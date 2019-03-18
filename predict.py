@@ -116,15 +116,15 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     from utils.utils import show_img, draw_bbox
 
-    os.environ['CUDA_VISIBLE_DEVICES'] = str('1')
-    model_path= 'output/psenet_icd2015_gpu_resnet1521_lr0.0001_zj_resize_600_pred_new_eval_model_pse_crop/PSENet_70_loss0.194245_r0.401541_p0.586086_f10.476571.pth'
+    os.environ['CUDA_VISIBLE_DEVICES'] = str('2')
+    model_path= 'output/psenet_icd2015_resnet152/best_r0.642754_p0.614924_f10.628531.pth'
 
     # model_path = 'output/psenet_icd2015_new_loss/final.pth'
 
     # img_path = '/data2/dataset/ICD15/img/img_1.jpg'
-    img_path = '/data2/dataset/ICD15/test/img/img_130.jpg'
+    img_path = '0.jpg'
     label_path = '/data2/dataset/ICD15/test/gt/gt_img_130.txt'
-    label = _get_annotation(label_path)
+    # label = _get_annotation(label_path)
 
     # 初始化网络
     net = PSENet(backbone='resnet152', pretrained=False, result_num=config.n)
@@ -134,7 +134,7 @@ if __name__ == '__main__':
     preds, boxes_list = model.predict(img_path)
     show_img(preds)
     img = draw_bbox(img_path, boxes_list)
-    img = draw_bbox(img, label,color=(0,0,255))
+    # img = draw_bbox(img, label,color=(0,0,255))
     show_img(img, color=True)
 
     plt.show()

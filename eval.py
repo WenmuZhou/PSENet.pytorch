@@ -34,7 +34,7 @@ def main(model_path, path, save_path, gpu_id):
 
 if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = str('2')
-    model_path= 'output/psenet_icd2015_gpu_resnet1521_lr0.0001_pse_crop_mask/PSENet_356_loss0.259558_r0.378430_p0.577093_f10.457110.pth'
+    model_path= 'output/psenet_icd2015_resnet152_no_rotate_my_loss/PSENet_599_loss0.254078_r0.639384_p0.622889_f10.631029.pth'
     data_path = '/data2/dataset/ICD15/test/img'
     gt_path = '/data2/dataset/ICD15/test/gt'
     save_path = './result2'
@@ -42,3 +42,4 @@ if __name__ == '__main__':
     main(model_path, data_path, save_path, gpu_id=gpu_id)
     result = cal_recall_precison_f1(gt_path=gt_path, result_path=save_path)
     print(result)
+    # print(cal_recall_precison_f1('/data2/dataset/ICD151/test/gt', '/data1/zj/tensorflow_PSENet/tmp/'))

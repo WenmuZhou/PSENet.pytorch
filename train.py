@@ -21,10 +21,8 @@ from tensorboardX import SummaryWriter
 from dataset.data_utils import MyDataset
 from model import PSENet
 from model.loss import PSELoss
-# from PSELoss import PSELoss
 from utils.utils import load_checkpoint, save_checkpoint, setup_logger
-from utils.lr_scheduler import WarmupMultiStepLR
-from predict import decode
+from model.pse import decode as pse_decode
 from cal_recall import cal_recall_precison_f1
 
 
@@ -64,8 +62,9 @@ def train_epoch(net, optimizer, scheduler, train_loader, device, criterion, epoc
         if i % config.display_interval == 0:
             batch_time = time.time() - start
             logger.info(
-                '[{}/{}], [{}/{}], batch_loss_c: {:.4f}, batch_loss_s: {:.4f}, batch_loss: {:.4f}, time:{:.4f}, lr:{}'.format(
-                    epoch, config.epochs, i, all_step, loss_c, loss_s, loss, batch_time,
+                '[{}/{}], [{}/{}], step: {}, {:.3f} samples/sec, batch_loss: {:.4f}, batch_loss_c: {:.4f}, batch_loss_s: {:.4f}, time:{:.4f}, lr:{}'.format(
+                    epoch, config.epochs, i, all_step, cur_step, config.display_interval * cur_batch / batch_time,
+                    loss, loss_c, loss_s, batch_time,
                     str(scheduler.get_lr()[0])))
             start = time.time()
 
@@ -101,8 +100,7 @@ def eval(model, save_path, test_path, device):
 
     # 预测所有测试图片
     img_paths = [os.path.join(img_path, x) for x in os.listdir(img_path)]
-    pbar = tqdm(total=len(img_paths), desc='test model:')
-    for img_path in img_paths:
+    for img_path in tqdm(img_paths, desc='test model'):
         img_name = os.path.basename(img_path).split('.')[0]
         save_name = os.path.join(save_path, 'res_' + img_name + '.txt')
 
@@ -114,11 +112,8 @@ def eval(model, save_path, test_path, device):
         tensor = tensor.to(device)
         with torch.no_grad():
             preds = model(tensor)
-            _, boxes_list = decode(preds, num_pred=-1)
-        boxes_list = boxes_list.astype(np.int)[0]
+            _, boxes_list = pse_decode(preds[0])
         np.savetxt(save_name, boxes_list.reshape(-1, 8), delimiter=',', fmt='%d')
-        pbar.update(1)
-    pbar.close()
     # 开始计算 recall precision f1
     result_dict = cal_recall_precison_f1(gt_path, save_path)
     return result_dict['recall'], result_dict['precision'], result_dict['hmean']
@@ -163,7 +158,8 @@ def main():
     # dummy_input = torch.autograd.Variable(torch.Tensor(1, 3, 600, 800).to(device))
     # writer.add_graph(model=model, input_to_model=dummy_input)
     criterion = PSELoss(Lambda=config.Lambda, ratio=config.OHEM_ratio, reduction='mean')
-    optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
+    optimizer = torch.optim.SGD(model.parameters(), lr=config.lr, weight_decay=config.weight_decay, momentum=0.99,
+                                nesterov=True)
     if config.checkpoint != '' and not config.restart_training:
         start_epoch = load_checkpoint(config.checkpoint, model, logger, device, optimizer)
         scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, config.lr_decay_step, gamma=config.lr_gamma,
@@ -171,11 +167,6 @@ def main():
     else:
         start_epoch = config.start_epoch
         scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, config.lr_decay_step, gamma=config.lr_gamma)
-
-    # warmup for multi gpu
-    # milestones = [step // num_gpus for step in config.lr_decay_step]
-    # scheduler = WarmupMultiStepLR(optimizer=optimizer, milestones=milestones, gamma=config.lr_gamma,
-    #                               warmup_factor=config.warmup_factor, warmup_iters=config.warmup_iters)
 
     all_step = len(train_loader)
     logger.info('train dataset has {} samples,{} in dataloader'.format(train_data.__len__(), all_step))

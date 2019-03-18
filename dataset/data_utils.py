@@ -79,8 +79,8 @@ def augmentation(im: np.ndarray, text_polys: np.ndarray, scales: np.ndarray, deg
     # the images are horizontally fliped and rotated in range [−10◦, 10◦] randomly
     if random.random() < 0.5:
         im, text_polys = data_aug.horizontal_flip(im, text_polys)
-    if random.random() < 0.5:
-        im, text_polys = data_aug.random_rotate_img_bbox(im, text_polys, degrees)
+    # if random.random() < 0.5:
+    #     im, text_polys = data_aug.random_rotate_img_bbox(im, text_polys, degrees)
     # # 640 × 640 random samples are cropped from the transformed images
     # im, text_polys = data_aug.random_crop_img_bboxes(im, text_polys)
     # im, text_polys = data_aug.resize(im, text_polys, input_size, keep_ratio=False)
@@ -115,11 +115,11 @@ def image_label(im_fn: str, text_polys: np.ndarray, text_tags: list, n: int, m: 
         im = cv2.resize(im, dsize=None, fx=scale, fy=scale)
         text_polys *= scale
 
-    ## normal images
-    im = im.astype(np.float32)
-    im /= 255.0
-    im -= np.array((0.485, 0.456, 0.406))
-    im /= np.array((0.229, 0.224, 0.225))
+    # # normal images
+    # im = im.astype(np.float32)
+    # im /= 255.0
+    # im -= np.array((0.485, 0.456, 0.406))
+    # im /= np.array((0.229, 0.224, 0.225))
 
     h, w, _ = im.shape
     training_mask = np.ones((h, w), dtype=np.uint8)

@@ -51,31 +51,34 @@ class PSELoss(nn.Module):
         return all_loss_c, all_loss_s, all_loss
 
     def single_sample_loss(self, pred, label, training_mask):
-        pred_n = pred[-1] * training_mask
-        label_n = label[-1] * training_mask
-        M = self.cal_M(pred_n)
-        L_c = 1 - self.cal_D(pred_n.unsqueeze(0) * M, label_n.unsqueeze(0) * M)
+        pred = pred * training_mask
+        label = label * training_mask
+        M = self.cal_M(pred[-1], pred[-1])
+        L_c = 1 - self.dice_coefficient(pred[-1] * M, label[-1] * M)
         # 计算L_s
-        W = (pred_n >= 0.5).float()
-        L_s = 1 - self.cal_D(pred[:-1] * W, label[:-1] * W)
+        W = (pred[-1] >= 0.5).float()
+        L_s = 0
+        for i in range(0, len(label) - 1):
+            dice = self.dice_coefficient(pred[i] * W, label[i] * W)
+            L_s += dice
+        L_s = 1 - L_s / (len(label) - 1)
         all_loss = self.Lambda * L_c + (1 - self.Lambda) * L_s
         return L_c, L_s, all_loss
 
-    def cal_D(self, S, G):
+    def dice_coefficient(self, S, G):
         """
         计算每个样本的D
         :param S:
         :param G:
         :return:
         """
-        D = []
-        for s, g in zip(S, G):
-            D.append(2 * torch.sum(s * g) / (torch.sum(s * s) + torch.sum(g * g) + 1e-6))
-        if not D:
-            return torch.tensor(1).float().cuda()
-        return torch.mean(torch.stack(D))
+        eps = 1e-5
+        intersection = torch.sum(S * G)
+        union = torch.sum(S * S) + torch.sum(G * G) + eps
+        dice = 2 * intersection / union
+        return dice
 
-    def cal_M(self, pred_n):
+    def cal_M(self, pred_n, label_n):
         """
         使用OHEM算法选择参与计算loss的文本和背景像素矩阵,单个样本
         :param pred_n: 完整文本实例的预测结果
@@ -83,22 +86,19 @@ class PSELoss(nn.Module):
         :return:
         """
         # 计算选择背景区域像素点个数
-        pos_mask = (pred_n >= 0.5)
-        neg_mask = (pred_n < 0.5)
+        pos_mask = (label_n >= 0.5)
+        neg_mask = (label_n < 0.5)
         n_pos = pos_mask.sum().int().item()
         n_neg = neg_mask.sum().int().item()
+        n_neg = min(n_pos * self.ratio, n_neg)
         if n_neg > n_pos * self.ratio:
             n_neg = n_pos * self.ratio
             # 从预测图里拿到背景像素的分数
             zero_predict_score = pred_n.masked_select(neg_mask)
             # 按照OHEM的比例选取背景像素的x,y索引
             value, _ = zero_predict_score.topk(n_neg)
-            if len(value):
-                threshold = value[-1]
-                M = pred_n >= threshold
-            else:
-                # 当n_pos==0时
-                M = torch.ones_like(pred_n).to(pred_n.device)
+            threshold = value[-1]
+            M = pred_n >= threshold
         else:
             M = torch.ones_like(pred_n).to(pred_n.device)
         return M.float()

@@ -2,17 +2,20 @@
 # @Time    : 1/26/19 5:59 PM
 # @Author  : zhoujun
 import time
+import numba
+from pse import pse
 import numpy as np
 import cv2
 
-
-def pse(kernels, min_area):
-    kernel_num = len(kernels)  # 判断里面有几个kernel
+def pse_py(kernels, min_area):
     pred = np.zeros(kernels[0].shape, dtype=np.uint8)  # 最终的预测输出
-    _, label, stats, centroids = cv2.connectedComponentsWithStats(kernels[0].astype(np.uint8), connectivity=4)
-    for stat in stats[1:]:
-        if stat[-1] < min_area:
-            label[stat[1]:stat[1] + stat[3], stat[0]:stat[0] + stat[2]] = 0
+    label_num, label = cv2.connectedComponents(kernels[0].astype(np.uint8), connectivity=4)
+    label_values = []
+    for label_idx in range(1, label_num):
+        if np.sum(label == label_idx) < min_area:
+            label[label == label_idx] = 0
+            continue
+        label_values.append(label_idx)
 
     queue = []
     next_queue = []
@@ -29,7 +32,6 @@ def pse(kernels, min_area):
     dy = [0, 0, -1, 1]
     # for kernel_idx in range(1, kernel_num):  # 遍历每一个kernel
     for kernel in kernels[1:]:  # 遍历每一个kernel
-        tic = time.time()
         while len(queue):
             (x, y, l) = queue.pop(0)  # 点出队列
             is_edge = True
@@ -46,9 +48,8 @@ def pse(kernels, min_area):
             if is_edge:
                 # 如果当前边界像素没有被替代，就更新下一个map的边界像素
                 next_queue.append((x, y, l))
-        # print(time.time()-tic)
         queue, next_queue = next_queue, queue
-    return pred, len(stats[1:])
+    return pred, len(label_values)
 
 
 def decode(preds, threshold=0.5):
@@ -87,7 +88,6 @@ if __name__ == '__main__':
     # com = np.concatenate((x,y,x,y),axis=2)
     # kernels = np.stack((s1, s2, s3)).astype(np.uint8)
     kernels = np.load('/data1/zj/PSENet.pytorch/result.npy')
-    import time
 
     tic = time.time()
     pred = pse(kernels, 100)
