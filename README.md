@@ -38,4 +38,4 @@ The project is still under development.
 ### [ICDAR 2015](http://rrc.cvc.uab.es/?ch=4&com=evaluation&task=1)
 | Method                   | Precision (%) | Recall (%) | F-measure (%) | fps |
 |--------------------------|---------------|------------|---------------|-----|
-| PSENet-1s with resnet152 | 76.46         | 74.77      | 75.60         | 1.4 |
+| PSENet-1s with resnet152 | 76.46         | 74.77      | 75.60         | 5 |
