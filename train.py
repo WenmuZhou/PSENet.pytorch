@@ -20,7 +20,8 @@ from tensorboardX import SummaryWriter
 
 from dataset.data_utils import MyDataset
 from model import PSENet
-from model.loss import PSELoss
+# from model.loss import PSELoss
+from model.authot_loss import PSELoss
 from utils.utils import load_checkpoint, save_checkpoint, setup_logger
 from model.pse import decode as pse_decode
 from cal_recall import cal_recall_precison_f1
@@ -33,11 +34,29 @@ def weights_init(m):
             nn.init.constant_(m.bias, 0)
 
 
+# learning rate的warming up操作
+def adjust_learning_rate(optimizer, epoch):
+    """Sets the learning rate
+    # Adapted from PyTorch Imagenet example:
+    # https://github.com/pytorch/examples/blob/master/imagenet/main.py
+    """
+    if epoch < config.warm_up_epoch:
+        lr = 1e-6 + (config.lr - 1e-6) * epoch / (config.warm_up_epoch)
+    else:
+        lr = config.lr * (config.lr_gamma ** (epoch / config.lr_decay_step[0]))
+
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = lr
+
+    return lr
+
+
 def train_epoch(net, optimizer, scheduler, train_loader, device, criterion, epoch, all_step, writer, logger):
     net.train()
     train_loss = 0.
     start = time.time()
     scheduler.step()
+    lr = scheduler.get_lr()[0] #adjust_learning_rate(optimizer, epoch)  # str(scheduler.get_lr()[0])
     for i, (images, labels, training_mask) in enumerate(train_loader):
         cur_batch = images.size()[0]
         images, labels, training_mask = images.to(device), labels.to(device), training_mask.to(device)
@@ -57,15 +76,14 @@ def train_epoch(net, optimizer, scheduler, train_loader, device, criterion, epoc
         writer.add_scalar(tag='Train/loss_c', scalar_value=loss_c, global_step=cur_step)
         writer.add_scalar(tag='Train/loss_s', scalar_value=loss_s, global_step=cur_step)
         writer.add_scalar(tag='Train/loss', scalar_value=loss, global_step=cur_step)
-        writer.add_scalar(tag='Train/lr', scalar_value=scheduler.get_lr()[0], global_step=cur_step)
+        writer.add_scalar(tag='Train/lr', scalar_value=lr, global_step=cur_step)
 
         if i % config.display_interval == 0:
             batch_time = time.time() - start
             logger.info(
                 '[{}/{}], [{}/{}], step: {}, {:.3f} samples/sec, batch_loss: {:.4f}, batch_loss_c: {:.4f}, batch_loss_s: {:.4f}, time:{:.4f}, lr:{}'.format(
                     epoch, config.epochs, i, all_step, cur_step, config.display_interval * cur_batch / batch_time,
-                    loss, loss_c, loss_s, batch_time,
-                    str(scheduler.get_lr()[0])))
+                    loss, loss_c, loss_s, batch_time, lr))
             start = time.time()
 
         if i % config.show_images_interval == 0:
@@ -80,12 +98,13 @@ def train_epoch(net, optimizer, scheduler, train_loader, device, criterion, epoc
                                           pad_value=1)
             writer.add_image(tag='input/label', img_tensor=show_label, global_step=cur_step)
 
+            y1 = torch.sigmoid(y1)
             show_y = y1.detach().cpu()
             b, c, h, w = show_y.size()
             show_y = show_y.reshape(b * c, h, w)
             show_y = vutils.make_grid(show_y.unsqueeze(1), nrow=config.n, normalize=False, padding=20, pad_value=1)
             writer.add_image(tag='output/preds', img_tensor=show_y, global_step=cur_step)
-    return train_loss
+    return train_loss / all_step, lr
 
 
 def eval(model, save_path, test_path, device):
@@ -112,7 +131,7 @@ def eval(model, save_path, test_path, device):
         tensor = tensor.to(device)
         with torch.no_grad():
             preds = model(tensor)
-            _, boxes_list = pse_decode(preds[0])
+            _, boxes_list = pse_decode(preds[0],model.scale)
         np.savetxt(save_name, boxes_list.reshape(-1, 8), delimiter=',', fmt='%d')
     # 开始计算 recall precision f1
     result_dict = cal_recall_precison_f1(gt_path, save_path)
@@ -158,10 +177,10 @@ def main():
     # dummy_input = torch.autograd.Variable(torch.Tensor(1, 3, 600, 800).to(device))
     # writer.add_graph(model=model, input_to_model=dummy_input)
     criterion = PSELoss(Lambda=config.Lambda, ratio=config.OHEM_ratio, reduction='mean')
-    optimizer = torch.optim.SGD(model.parameters(), lr=config.lr, weight_decay=config.weight_decay, momentum=0.99,
-                                nesterov=True)
+    # optimizer = torch.optim.SGD(model.parameters(), lr=config.lr, momentum=0.99)
+    optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
     if config.checkpoint != '' and not config.restart_training:
-        start_epoch = load_checkpoint(config.checkpoint, model, logger, device, optimizer)
+        start_epoch = load_checkpoint(config.checkpoint, model, logger, device)
         scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, config.lr_decay_step, gamma=config.lr_gamma,
                                                          last_epoch=start_epoch)
     else:
@@ -175,27 +194,31 @@ def main():
     try:
         for epoch in range(start_epoch + 1, config.epochs):
             start = time.time()
-            train_loss = train_epoch(model, optimizer, scheduler, train_loader, device, criterion, epoch, all_step,
-                                     writer, logger)
+            train_loss, lr = train_epoch(model, optimizer, scheduler, train_loader, device, criterion, epoch, all_step,
+                                         writer, logger)
             logger.info('[{}/{}], train_loss: {:.4f}, time: {:.4f}, lr: {}'.format(
-                epoch, config.epochs, train_loss / all_step, time.time() - start, str(scheduler.get_lr()[0])))
+                epoch, config.epochs, train_loss, time.time() - start, lr))
+            # net_save_path = '{}/PSENet_{}_loss{:.6f}.pth'.format(config.output_dir, epoch,
+            #                                                                               train_loss)
+            # save_checkpoint(net_save_path, model, optimizer, epoch, logger)
+            if (0.3 < train_loss < 0.4 and epoch % 4 == 0) or train_loss < 0.3:
+                recall, precision, f1 = eval(model, os.path.join(config.output_dir, 'output'), config.testroot, device)
+                logger.info('test: recall: {:.6f}, precision: {:.6f}, f1: {:.6f}'.format(recall, precision, f1))
 
-            recall, precision, f1 = eval(model, os.path.join(config.output_dir, 'output'), config.testroot, device)
-            logger.info('test: recall: {:.6f}, precision: {:.6f}, f1: {:.6f}'.format(recall, precision, f1))
-
-            net_save_path = '{}/PSENet_{}_loss{:.6f}_r{:.6f}_p{:.6f}_f1{:.6f}.pth'.format(config.output_dir, epoch,
-                                                                                          train_loss / all_step, recall,
-                                                                                          precision,
-                                                                                          f1)
-            save_checkpoint(net_save_path, model, optimizer, epoch, logger)
-            if f1 > best_model['f1']:
-                best_model['recall'] = recall
-                best_model['precision'] = precision
-                best_model['f1'] = f1
-                best_model['model'] = net_save_path
-            writer.add_scalar(tag='Test/recall', scalar_value=recall, global_step=epoch)
-            writer.add_scalar(tag='Test/precision', scalar_value=precision, global_step=epoch)
-            writer.add_scalar(tag='Test/f1', scalar_value=f1, global_step=epoch)
+                net_save_path = '{}/PSENet_{}_loss{:.6f}_r{:.6f}_p{:.6f}_f1{:.6f}.pth'.format(config.output_dir, epoch,
+                                                                                              train_loss,
+                                                                                              recall,
+                                                                                              precision,
+                                                                                              f1)
+                save_checkpoint(net_save_path, model, optimizer, epoch, logger)
+                if f1 > best_model['f1']:
+                    best_model['recall'] = recall
+                    best_model['precision'] = precision
+                    best_model['f1'] = f1
+                    best_model['model'] = net_save_path
+                writer.add_scalar(tag='Test/recall', scalar_value=recall, global_step=epoch)
+                writer.add_scalar(tag='Test/precision', scalar_value=precision, global_step=epoch)
+                writer.add_scalar(tag='Test/f1', scalar_value=f1, global_step=epoch)
         writer.close()
     except KeyboardInterrupt:
         save_checkpoint('{}/final.pth'.format(config.output_dir), model, optimizer, epoch, logger)

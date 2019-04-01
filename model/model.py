@@ -11,9 +11,10 @@ inplace = True
 
 
 class PSENet(nn.Module):
-    def __init__(self, backbone, result_num, pretrained=False):
+    def __init__(self, backbone, result_num, scale: int = 1, pretrained=False):
         super(PSENet, self).__init__()
         assert backbone in d, 'backbone must in: {}'.format(d)
+        self.scale = scale
         self.backbone = globals()[backbone](pretrained=pretrained)
 
         # Top layer
@@ -37,6 +38,7 @@ class PSENet(nn.Module):
         self.out_conv = nn.Conv2d(256, result_num, kernel_size=1, stride=1)
 
     def forward(self, input: torch.Tensor):
+        _, _, H, W = input.size()
         c1, c2, c3, c4, c5 = self.backbone(input)
         # Top-down
         p5 = self.toplayer(c5)
@@ -51,8 +53,9 @@ class PSENet(nn.Module):
         x = self._upsample_cat(p2, p3, p4, p5)
         x = self.conv(x)
         x = self.out_conv(x)
-        x = F.interpolate(x, size=input.size()[2:], mode='bilinear', align_corners=True)
-        x = torch.sigmoid(x)
+
+        x = F.interpolate(x, size=(H // self.scale, W // self.scale), mode='bilinear', align_corners=True)
+        # x = torch.sigmoid(x)
         return x
 
     def _upsample_add(self, x, y):

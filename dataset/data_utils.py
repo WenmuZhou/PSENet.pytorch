@@ -79,10 +79,11 @@ def augmentation(im: np.ndarray, text_polys: np.ndarray, scales: np.ndarray, deg
     # the images are horizontally fliped and rotated in range [−10◦, 10◦] randomly
     if random.random() < 0.5:
         im, text_polys = data_aug.horizontal_flip(im, text_polys)
-    # if random.random() < 0.5:
-    #     im, text_polys = data_aug.random_rotate_img_bbox(im, text_polys, degrees)
-    # # 640 × 640 random samples are cropped from the transformed images
+    if random.random() < 0.5:
+        im, text_polys = data_aug.random_rotate_img_bbox(im, text_polys, degrees)
+    # 640 × 640 random samples are cropped from the transformed images
     # im, text_polys = data_aug.random_crop_img_bboxes(im, text_polys)
+
     # im, text_polys = data_aug.resize(im, text_polys, input_size, keep_ratio=False)
     # im, text_polys = data_aug.random_crop_image_pse(im, text_polys, input_size)
 
@@ -102,6 +103,7 @@ def image_label(im_fn: str, text_polys: np.ndarray, text_tags: list, n: int, m: 
     '''
 
     im = cv2.imread(im_fn)
+    im = cv2.cvtColor(im,cv2.COLOR_BGR2RGB)
     h, w, _ = im.shape
     # 检查越界
     text_polys = check_and_validate_polys(text_polys, (h, w))
@@ -130,7 +132,7 @@ def image_label(im_fn: str, text_polys: np.ndarray, text_tags: list, n: int, m: 
         score_maps.append(score_map)
     score_maps = np.array(score_maps, dtype=np.float32)
     imgs = data_aug.random_crop_author([im, score_maps.transpose((1, 2, 0)),training_mask], (input_size, input_size))
-    return imgs[0], imgs[1].transpose((2, 0, 1)), imgs[2]
+    return imgs[0], imgs[1].transpose((2, 0, 1)), imgs[2]#im,score_maps,training_mask#
 
 
 class MyDataset(data.Dataset):

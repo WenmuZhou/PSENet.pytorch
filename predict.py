@@ -7,34 +7,8 @@ import os
 import cv2
 import time
 import numpy as np
-from model.pse import decode as pse_decode
 
-
-def decode(preds,num_pred=3, threshold=0.5):
-    all_bbox_list = []
-    preds = (preds >= threshold).detach()
-    preds = (preds * preds[-1]).cpu().numpy()
-    for result in preds:
-        # result = self.psea(result)
-        h, w = result.shape[-2:]
-        _, contours, hierarchy = cv2.findContours(result[num_pred], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-        bbox_list = []
-        for contour in contours:
-            rect = cv2.minAreaRect(contour)
-            h1, w1 = rect[1]
-            if abs(h1 - w1) < 5 or w1 < 10 or h1 < 10:
-                continue
-            point = cv2.boxPoints(rect)
-            point[:, 0] = np.clip(point[:, 0], 0, w - 1)
-            point[:, 1] = np.clip(point[:, 1], 0, h - 1)
-
-            # area = cv2.contourArea(point)
-            # if area <= 460:
-            #     continue
-            bbox_list.append([point[1], point[2], point[3], point[0]])
-        all_bbox_list.append(bbox_list)
-    return preds,np.array(all_bbox_list)
+from model.pse import decode as pse_decode, decode_author
 
 
 class Pytorch_model:
@@ -57,6 +31,7 @@ class Pytorch_model:
         if net is not None:
             # 如果网络计算图和参数是分开保存的，就执行参数加载
             net = net.to(self.device)
+            net.scale = scale
             try:
                 sk = {}
                 for k in self.net:
@@ -68,7 +43,7 @@ class Pytorch_model:
             print('load model')
         self.net.eval()
 
-    def predict(self, img: str):
+    def predict(self, img: str, long_size: int = 2240):
         '''
         对传入的图像进行预测，支持图像地址,opecv 读取图片，偏慢
         :param img: 图像地址
@@ -77,23 +52,29 @@ class Pytorch_model:
         '''
         assert os.path.exists(img), 'file is not exists'
         img = cv2.imread(img)
+        # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         h, w = img.shape[:2]
 
-        # scale = 2240 / h if h > w else 2240 / w
-        # t_img = cv2.resize(img, None, fx=scale, fy=scale)
+        scale = long_size * 1.0 / max(h, w)
+        img = cv2.resize(img, None, fx=scale, fy=scale)
         # 将图片由(w,h)变为(1,img_channel,h,w)
         tensor = transforms.ToTensor()(img)
         tensor = tensor.unsqueeze_(0)
 
         tensor = tensor.to(self.device)
         with torch.no_grad():
+            torch.cuda.synchronize()
+            start = time.time()
             preds = self.net(tensor)
-            # tic = time.time()
-            preds, boxes_list = pse_decode(preds[0],threshold=0.5)
-            # print(time.time()-tic)
+            preds, boxes_list = pse_decode(preds[0], self.scale)
+            scale = (preds.shape[0] * 1.0 / h, preds.shape[1] * 1.0 / w)
             # preds, boxes_list = decode(preds,num_pred=-1)
-            # boxes_list /= scale
-        return preds, boxes_list
+            if len(boxes_list):
+                boxes_list = boxes_list / scale
+            torch.cuda.synchronize()
+            t = time.time() - start
+        return preds, boxes_list, t
+
 
 def _get_annotation(label_path):
     boxes = []
@@ -110,6 +91,7 @@ def _get_annotation(label_path):
                 print('load label failed on {}'.format(label_path))
     return np.array(boxes, dtype=np.float32)
 
+
 if __name__ == '__main__':
     import config
     from model import PSENet
@@ -117,15 +99,17 @@ if __name__ == '__main__':
     from utils.utils import show_img, draw_bbox
 
     os.environ['CUDA_VISIBLE_DEVICES'] = str('2')
-    model_path= 'output/psenet_icd2015_resnet152/best_r0.642754_p0.614924_f10.628531.pth'
+
+    model_path = 'output/psenet_icd2015_resnet152_my_loss_0.0001_author_crop_adam_newcrop_authorloss_fxw/PSENet_599_loss0.110923.pth'
 
     # model_path = 'output/psenet_icd2015_new_loss/final.pth'
+    img_id = 1
+    img_path = '/data2/dataset/ICD15/test/img/img_{}.jpg'.format(img_id)
+    # img_path = '0.jpg'
+    label_path = '/data2/dataset/ICD15/test/gt/gt_img_{}.txt'.format(img_id)
+    label = _get_annotation(label_path)
 
-    # img_path = '/data2/dataset/ICD15/img/img_1.jpg'
-    img_path = '0.jpg'
-    label_path = '/data2/dataset/ICD15/test/gt/gt_img_130.txt'
-    # label = _get_annotation(label_path)
-
+    img_path = '/data1/gcz/拍照清单数据集_备份/87436979.jpg'
     # 初始化网络
     net = PSENet(backbone='resnet152', pretrained=False, result_num=config.n)
     model = Pytorch_model(model_path, net=net, scale=1, gpu_id=0)
@@ -133,7 +117,8 @@ if __name__ == '__main__':
     #     model.predict(img_path)
     preds, boxes_list = model.predict(img_path)
     show_img(preds)
-    img = draw_bbox(img_path, boxes_list)
+    img = draw_bbox(img_path, boxes_list, color=(0, 0, 255))
+    cv2.imwrite('result.jpg', img)
     # img = draw_bbox(img, label,color=(0,0,255))
     show_img(img, color=True)
 

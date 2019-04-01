@@ -2,78 +2,74 @@
 # @Time    : 1/26/19 5:59 PM
 # @Author  : zhoujun
 import time
-import numba
+from utils import exe_time
 from pse import pse
 import numpy as np
+import torch
 import cv2
 
-def pse_py(kernels, min_area):
-    pred = np.zeros(kernels[0].shape, dtype=np.uint8)  # 最终的预测输出
-    label_num, label = cv2.connectedComponents(kernels[0].astype(np.uint8), connectivity=4)
-    label_values = []
-    for label_idx in range(1, label_num):
-        if np.sum(label == label_idx) < min_area:
-            label[label == label_idx] = 0
-            continue
-        label_values.append(label_idx)
+def decode(preds, scale):
+    score = torch.sigmoid(preds[-1])
+    outputs = (torch.sign(preds - 1) + 1) / 2
 
-    queue = []
-    next_queue = []
-    points = np.array(np.where(label > 0)).transpose((1, 0))  # points存储所有点坐标(x,y)
-
-    for point_idx in range(points.shape[0]):  # 遍历每一个点
-        x, y = points[point_idx, 0], points[point_idx, 1]  # 取出每一个点的坐标
-        l = label[x, y]  # 取出点的label值
-        queue.append((x, y, l))  # 将该点送入队列
-        # queue.put((x, y, l))
-        pred[x, y] = l  # 对该点赋值
-
-    dx = [-1, 1, 0, 0]
-    dy = [0, 0, -1, 1]
-    # for kernel_idx in range(1, kernel_num):  # 遍历每一个kernel
-    for kernel in kernels[1:]:  # 遍历每一个kernel
-        while len(queue):
-            (x, y, l) = queue.pop(0)  # 点出队列
-            is_edge = True
-            for j in range(4):  # 邻域判断
-                tmpx = x + dx[j]  # 四个邻域遍历
-                tmpy = y + dy[j]
-                if tmpx < 0 or tmpx >= kernel.shape[0] or tmpy < 0 or tmpy >= kernel.shape[1]:
-                    continue
-                if kernel[tmpx, tmpy] == 0 or pred[tmpx, tmpy] > 0:
-                    continue
-                queue.append((tmpx, tmpy, l))
-                pred[tmpx, tmpy] = l
-                is_edge = False
-            if is_edge:
-                # 如果当前边界像素没有被替代，就更新下一个map的边界像素
-                next_queue.append((x, y, l))
-        queue, next_queue = next_queue, queue
-    return pred, len(label_values)
-
-
-def decode(preds, threshold=0.5):
-    # preds = (preds >= threshold).detach()
-    # preds = (preds * preds[-1]).cpu().numpy()
-    # np.save('result.npy', preds)
-    # pred, label_num = pse(preds,100)
-
-    mask = (preds[-1] > threshold).detach().float()
-    preds = (preds * mask).detach().cpu().numpy()
-    pred, label_num = pse(preds >= threshold, 100)
-    h, w = pred.shape[-2:]
+    text = outputs[-1]
+    kernels = outputs * text
+    score = score.detach().cpu().numpy().astype(np.float32)
+    kernels = kernels.detach().cpu().numpy()
+    pred, label_values = pse(kernels.astype(np.uint8), 5 / (scale * scale))
     bbox_list = []
-    for label_idx in range(1, label_num + 1):
-        result = (pred == label_idx).astype(np.uint8)
-        _, contours, hierarchy = cv2.findContours(result, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        for contour in contours:
-            rect = cv2.minAreaRect(contour)
-            point = cv2.boxPoints(rect)
-            point[:, 0] = np.clip(point[:, 0], 0, w - 1)
-            point[:, 1] = np.clip(point[:, 1], 0, h - 1)
-            bbox_list.append([point[1], point[2], point[3], point[0]])
+    for label_value in label_values:
+        points = np.array(np.where(pred == label_value)).transpose((1, 0))[:, ::-1]
+
+        if points.shape[0] < 800 / (scale * scale):
+            continue
+
+        score_i = np.mean(score[pred == label_value])
+        if score_i < 0.93:
+            continue
+
+        rect = cv2.minAreaRect(points)
+        bbox = cv2.boxPoints(rect)
+        bbox_list.append([bbox[1], bbox[2], bbox[3], bbox[0]])
 
     return pred, np.array(bbox_list)
+
+
+def decode_author(preds, scale):
+    from author_pse import pse as apse
+
+    score = torch.sigmoid(preds[-1])
+    outputs = (torch.sign(preds - 1) + 1) / 2
+
+    text = outputs[-1]
+    kernels = outputs * text
+
+    score = score.data.cpu().numpy().astype(np.float32)
+    kernels = kernels.data.cpu().numpy().astype(np.uint8)
+
+    # c++ version pse
+    pred = apse(kernels, 5.0 / (scale * scale))
+    # python version pse
+    # pred = pypse(kernels, args.min_kernel_area / (args.scale * args.scale))
+
+    label = pred
+    label_num = np.max(label) + 1
+    bboxes = []
+    for i in range(1, label_num):
+        points = np.array(np.where(label == i)).transpose((1, 0))[:, ::-1]
+
+        if points.shape[0] < 800 / (scale * scale):
+            continue
+
+        score_i = np.mean(score[label == i])
+        if score_i < 0.93:
+            continue
+
+        rect = cv2.minAreaRect(points)
+        bbox = cv2.boxPoints(rect)
+        bboxes.append([bbox[1], bbox[2], bbox[3], bbox[0]])
+        # bboxes.append(bbox.reshape(-1))
+    return pred, np.array(bboxes)
 
 
 if __name__ == '__main__':

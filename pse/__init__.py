@@ -28,8 +28,8 @@ def pse(kernals, min_area=5):
             continue
         label_values.append(label_idx)
 
-    pred = pse_cpp(label, kernals, c=6)
+    pred = pse_cpp(label, kernals, c=kernal_num)
 
-    return np.array(pred), len(label_values)
+    return np.array(pred), label_values
 
 

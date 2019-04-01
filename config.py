@@ -5,7 +5,7 @@
 # data config
 trainroot = '/data2/dataset/ICD15/train'
 testroot = '/data2/dataset/ICD15/test'
-output_dir = 'output/psenet_icd2015_resnet152_no_rotate_my_loss_0.0001'
+output_dir = 'output/psenet_icd2015_resnet50_my_loss_0.001_author_crop_adam_newcrop_authorloss'
 data_shape = 640
 
 # train config
@@ -14,23 +14,24 @@ workers = 6
 start_epoch = 0
 epochs = 600
 
-train_batch_size = 4
+train_batch_size = 8
 
-lr = 1e-4
+lr = 1e-3
 end_lr = 1e-7
 lr_gamma = 0.1
-lr_decay_step = [200, 400]
+lr_decay_step = [200,400]
 weight_decay = 5e-4
-warmup_factor = 1.0 / 3
-warmup_iters = 30
+warm_up_epoch = 6
+warm_up_lr = lr * lr_gamma
+
 display_interval = 10
 show_images_interval = 50
 pretrained = True
 restart_training = True
-checkpoint = 'output/psenet_icd2015_resnet152_no_rotate_my_loss/PSENet_200_loss0.296573_r0.670679_p0.628043_f10.648661.pth'
+checkpoint = 'output/psenet_icd2015_resnet152_my_loss_0.0001_author_crop/PSENet_446_loss0.257294_r0.715936_p0.713874_f10.714904.pth'
 
 # net config
-backbone = 'resnet152'
+backbone = 'resnet50'
 Lambda = 0.7
 n = 6
 m = 0.5
