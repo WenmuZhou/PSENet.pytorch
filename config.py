@@ -5,7 +5,7 @@
 # data config
 trainroot = '/data2/dataset/ICD15/train'
 testroot = '/data2/dataset/ICD15/test'
-output_dir = 'output/psenet_icd2015_resnet50_my_loss_0.001_author_crop_adam_newcrop_authorloss'
+output_dir = 'output/psenet_icd2015_resnet50_my_loss_0.001_author_crop_adam_newcrop_warm_up_authorloss'
 data_shape = 640
 
 # train config
@@ -16,7 +16,7 @@ epochs = 600
 
 train_batch_size = 8
 
-lr = 1e-3
+lr = 1e-4
 end_lr = 1e-7
 lr_gamma = 0.1
 lr_decay_step = [200,400]

@@ -43,7 +43,18 @@ The project is still under development.
 ### [ICDAR 2015](http://rrc.cvc.uab.es/?ch=4&com=evaluation&task=1)
 only train with ICDAR2015 dataset with single 1080ti
 
-my implementation with author loss
+my implementation with author loss use adam and MultiStepLR
+
+| Method                   | Precision (%) | Recall (%) | F-measure (%) | fps |
+|--------------------------|---------------|------------|---------------|-----|
+| PSENet-1s with resnet50 batch 8  | 83.49 | 79.62 | 81.51 | 1.76 |
+| PSENet-2s with resnet50 batch 8  | 83.37 | 79.68 | 81.48 | 3.55 |
+| PSENet-4s with resnet50 batch 8  | 82.44 | 78.91 | 80.63 | 4.43 |
+| PSENet-1s with resnet152 batch 4 | 85.04 | 79.68 | 82.27 | 1.48 |
+| PSENet-2s with resnet152 batch 4 | 84.88 | 79.20 | 81.94 | 2.56 |
+| PSENet-4s with resnet152 batch 4 | 83.81 | 78.76 | 81.21 | 2.99 |
+
+my implementation with author loss use adam and warm_up
 
 | Method                   | Precision (%) | Recall (%) | F-measure (%) | fps |
 |--------------------------|---------------|------------|---------------|-----|

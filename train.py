@@ -55,8 +55,8 @@ def train_epoch(net, optimizer, scheduler, train_loader, device, criterion, epoc
     net.train()
     train_loss = 0.
     start = time.time()
-    scheduler.step()
-    lr = scheduler.get_lr()[0] #adjust_learning_rate(optimizer, epoch)  # str(scheduler.get_lr()[0])
+    # scheduler.step()
+    lr = adjust_learning_rate(optimizer, epoch)  # str(scheduler.get_lr()[0])
     for i, (images, labels, training_mask) in enumerate(train_loader):
         cur_batch = images.size()[0]
         images, labels, training_mask = images.to(device), labels.to(device), training_mask.to(device)
