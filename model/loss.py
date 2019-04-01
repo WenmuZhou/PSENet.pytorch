@@ -51,6 +51,7 @@ class PSELoss(nn.Module):
         return all_loss_c, all_loss_s, all_loss
 
     def single_sample_loss(self, pred, label, training_mask):
+        pred = torch.sigmoid(pred)
         pred_n = pred[-1] * training_mask
         label_n = label[-1] * training_mask
         M = self.cal_M(pred_n)

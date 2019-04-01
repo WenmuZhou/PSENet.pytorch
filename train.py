@@ -20,8 +20,8 @@ from tensorboardX import SummaryWriter
 
 from dataset.data_utils import MyDataset
 from model import PSENet
-# from model.loss import PSELoss
-from model.authot_loss import PSELoss
+from model.loss import PSELoss
+# from model.authot_loss import PSELoss
 from utils.utils import load_checkpoint, save_checkpoint, setup_logger
 from model.pse import decode as pse_decode
 from cal_recall import cal_recall_precison_f1

@@ -54,18 +54,18 @@ my implementation with author loss use adam and MultiStepLR
 | PSENet-2s with resnet152 batch 4 | 84.88 | 79.20 | 81.94 | 2.56 |
 | PSENet-4s with resnet152 batch 4 | 83.81 | 78.76 | 81.21 | 2.99 |
 
-my implementation with author loss use adam and warm_up
+my implementation with my loss use adam and warm_up
 
 | Method                   | Precision (%) | Recall (%) | F-measure (%) | fps |
 |--------------------------|---------------|------------|---------------|-----|
-| PSENet-1s with resnet50 batch 8  | 83.49 | 79.62 | 81.51 | 1.76 |
-| PSENet-2s with resnet50 batch 8  | 83.37 | 79.68 | 81.48 | 3.55 |
-| PSENet-4s with resnet50 batch 8  | 82.44 | 78.91 | 80.63 | 4.43 |
-| PSENet-1s with resnet152 batch 4 | 85.04 | 79.68 | 82.27 | 1.48 |
-| PSENet-2s with resnet152 batch 4 | 84.88 | 79.20 | 81.94 | 2.56 |
-| PSENet-4s with resnet152 batch 4 | 83.81 | 78.76 | 81.21 | 2.99 |
+| PSENet-1s with resnet50 batch 8  | tbd | tbd | tbd | 1.76 |
+| PSENet-2s with resnet50 batch 8  | tbd | tbd | tbd | 3.55 |
+| PSENet-4s with resnet50 batch 8  | tbd | tbd | tbd | 4.43 |
+| PSENet-1s with resnet152 batch 4 | 85.24 | 80.11 | 82.60 | 1.48 |
+| PSENet-2s with resnet152 batch 4 | 85.02 | 80.06 | 82.46 | 2.56 |
+| PSENet-4s with resnet152 batch 4 | 83.46 | 79.00 | 81.17 | 2.99 |
 
-official implementation
+official implementation use SGD and StepLR
 
 | Method                   | Precision (%) | Recall (%) | F-measure (%) | fps |
 |--------------------------|---------------|------------|---------------|-----|
@@ -86,3 +86,7 @@ official implementation
 ![](imgs/img_98.jpg)
 
 ![](imgs/img_125.jpg)
+
+### reference
+1. https://github.com/liuheng92/tensorflow_PSENet
+2. https://github.com/whai362/PSENet
