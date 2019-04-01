@@ -58,12 +58,12 @@ official implementation
 
 | Method                   | Precision (%) | Recall (%) | F-measure (%) | fps |
 |--------------------------|---------------|------------|---------------|-----|
-| PSENet-1s with resnet50 batch 8  | 80.26  | 84.15 | 82.16 | 1.76 |
-| PSENet-2s with resnet50 batch 8  | 79.82  | 83.61 | 81.67 | 3.72 |
-| PSENet-4s with resnet50 batch 8  | 78.23  | 81.90 | 80.03 | 4.51 |
-| PSENet-1s with resnet152 batch 4 | 78.76  | 82.87 | 80.77 | 1.53 |
-| PSENet-2s with resnet152 batch 4 | 78.33  | 82.33 | 80.28 | 2.61 |
-| PSENet-4s with resnet152 batch 4 | 77.13  | 81.19 | 79.11 | 3.00 |
+| PSENet-1s with resnet50 batch 8  |  84.15 | 80.26  | 82.16 | 1.76 |
+| PSENet-2s with resnet50 batch 8  |  83.61 | 79.82  | 81.67 | 3.72 |
+| PSENet-4s with resnet50 batch 8  |  81.90 | 78.23  | 80.03 | 4.51 |
+| PSENet-1s with resnet152 batch 4 |  82.87 | 78.76  | 80.77 | 1.53 |
+| PSENet-2s with resnet152 batch 4 |  82.33 | 78.33  | 80.28 | 2.61 |
+| PSENet-4s with resnet152 batch 4 |  81.19 | 77.13  | 79.11 | 3.00 |
 
 ### examples
 ![](imgs/img_31.jpg)
