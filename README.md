@@ -6,11 +6,6 @@
 1. add author loss, the results are compared in [Performance](#Performance)
 
 
-| Method                   | Precision (%) | Recall (%) | F-measure (%) | FPS(1080Ti) |
-|--------------------------|---------------|------------|---------------|-----|
-| PSENet-1s with resnet152 batch 8 myloss | 85.47         | 78.76      | 81.98         | 1.49 |
-| PSENet-1s with resnet152 batch 8 author loss| 85.04         | 79.68     | 82.27         | 1.48 |
-
 ### Download
 resnet50 and resnet152: [bauduyun](https://pan.baidu.com/s/1rN0oGBRsdUYmcQUayMZUOA) extract code: rxjf
 
