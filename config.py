@@ -5,7 +5,7 @@
 # data config
 trainroot = '/data2/dataset/ICD15/train'
 testroot = '/data2/dataset/ICD15/test'
-output_dir = 'output/psenet_icd2015_resnet50_my_loss_0.0001_author_crop_adam_newcrop_warm_up'
+output_dir = 'output/psenet_icd2015_resnet50_my_loss_0.0001_author_crop_adam_newcrop_warm_up_authorloss'
 data_shape = 640
 
 # train config
