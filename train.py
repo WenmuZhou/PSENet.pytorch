@@ -20,7 +20,7 @@ from tensorboardX import SummaryWriter
 
 from dataset.data_utils import MyDataset
 from model import PSENet
-#from model.loss import PSELoss
+# from model.loss import PSELoss
 from model.authot_loss import PSELoss
 from utils.utils import load_checkpoint, save_checkpoint, setup_logger
 from model.pse import decode as pse_decode
@@ -131,7 +131,7 @@ def eval(model, save_path, test_path, device):
         tensor = tensor.to(device)
         with torch.no_grad():
             preds = model(tensor)
-            _, boxes_list = pse_decode(preds[0],model.scale)
+            _, boxes_list = pse_decode(preds[0], model.scale)
         np.savetxt(save_name, boxes_list.reshape(-1, 8), delimiter=',', fmt='%d')
     # 开始计算 recall precision f1
     result_dict = cal_recall_precison_f1(gt_path, save_path)
@@ -181,6 +181,7 @@ def main():
     optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
     if config.checkpoint != '' and not config.restart_training:
         start_epoch = load_checkpoint(config.checkpoint, model, logger, device)
+        start_epoch += 1
         scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, config.lr_decay_step, gamma=config.lr_gamma,
                                                          last_epoch=start_epoch)
     else:
@@ -192,7 +193,7 @@ def main():
     epoch = 0
     best_model = {'recall': 0, 'precision': 0, 'f1': 0, 'model': ''}
     try:
-        for epoch in range(start_epoch + 1, config.epochs):
+        for epoch in range(start_epoch, config.epochs):
             start = time.time()
             train_loss, lr = train_epoch(model, optimizer, scheduler, train_loader, device, criterion, epoch, all_step,
                                          writer, logger)

@@ -8,9 +8,48 @@ import numpy as np
 import torch
 import cv2
 
+
+def decode_sigmoid(preds, scale, threshold=0.7311):
+    """
+    在输出上使用sigmoid 将值转换为置信度，并使用阈值来进行文字和背景的区分
+    :param preds: 网络输出
+    :param scale: 网络的scale
+    :param threshold: sigmoid的阈值
+    :return: 最后的输出图和文本框
+    """
+    preds = torch.sigmoid(preds)
+    preds = preds.detach().cpu().numpy()
+
+    score = preds[-1].astype(np.float32)
+    preds = preds > threshold
+    # preds = preds * preds[-1] # 使用最大的kernel作为其他小图的mask,不使用的话效果更好
+    pred, label_values = pse(preds, 5)
+    bbox_list = []
+    for label_value in label_values:
+        points = np.array(np.where(pred == label_value)).transpose((1, 0))[:, ::-1]
+
+        if points.shape[0] < 800 / (scale * scale):
+            continue
+
+        score_i = np.mean(score[pred == label_value])
+        if score_i < 0.93:
+            continue
+
+        rect = cv2.minAreaRect(points)
+        bbox = cv2.boxPoints(rect)
+        bbox_list.append([bbox[1], bbox[2], bbox[3], bbox[0]])
+    return pred, np.array(bbox_list)
+
+
 def decode(preds, scale):
+    """
+    将输出值在1以下的作为背景，1以上的作为文字，使用 https://github.com/liuheng92/tensorflow_PSENet/blob/feature_dev/pse的合并算法
+    :param preds: 网络输出
+    :param scale: 网络的scale
+    :return: 最后的输出图和文本框
+    """
     score = torch.sigmoid(preds[-1])
-    outputs = (torch.sign(preds - 1) + 1) / 2
+    outputs = (torch.sign(preds - 1) + 1) // 2
 
     text = outputs[-1]
     kernels = outputs * text
@@ -36,10 +75,16 @@ def decode(preds, scale):
 
 
 def decode_author(preds, scale):
+    """
+    将输出值在1以下的作为背景，1以上的作为文字，使用作者的合并算法
+    :param preds: 网络输出
+    :param scale: 网络的scale
+    :return: 最后的输出图和文本框
+    """
     from author_pse import pse as apse
 
     score = torch.sigmoid(preds[-1])
-    outputs = (torch.sign(preds - 1) + 1) / 2
+    outputs = (torch.sign(preds - 1) + 1) // 2
 
     text = outputs[-1]
     kernels = outputs * text

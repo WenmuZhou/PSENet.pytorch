@@ -8,7 +8,7 @@ import cv2
 import time
 import numpy as np
 
-from model.pse import decode as pse_decode, decode_author
+from model.pse import decode as pse_decode, decode_author,decode_sigmoid
 
 
 class Pytorch_model:
@@ -66,7 +66,7 @@ class Pytorch_model:
             torch.cuda.synchronize()
             start = time.time()
             preds = self.net(tensor)
-            preds, boxes_list = pse_decode(preds[0], self.scale)
+            preds, boxes_list = decode_sigmoid(preds[0], self.scale)
             scale = (preds.shape[0] * 1.0 / h, preds.shape[1] * 1.0 / w)
             # preds, boxes_list = decode(preds,num_pred=-1)
             if len(boxes_list):
@@ -100,22 +100,23 @@ if __name__ == '__main__':
 
     os.environ['CUDA_VISIBLE_DEVICES'] = str('2')
 
-    model_path = 'output/psenet_icd2015_resnet152_my_loss_0.0001_author_crop_adam_newcrop_authorloss_fxw/PSENet_599_loss0.110923.pth'
+    model_path = 'output/psenet_icd2015_resnet50_my_loss_0.0001_author_crop_adam_newcrop_warm_up_authorloss/PSENet_532_loss0.342119_r0.565720_p0.828048_f10.672197.pth'
 
     # model_path = 'output/psenet_icd2015_new_loss/final.pth'
-    img_id = 1
+    img_id = 10
     img_path = '/data2/dataset/ICD15/test/img/img_{}.jpg'.format(img_id)
     # img_path = '0.jpg'
     label_path = '/data2/dataset/ICD15/test/gt/gt_img_{}.txt'.format(img_id)
     label = _get_annotation(label_path)
 
-    img_path = '/data1/gcz/拍照清单数据集_备份/87436979.jpg'
+    # img_path = '/data1/gcz/拍照清单数据集_备份/87436979.jpg'
     # 初始化网络
-    net = PSENet(backbone='resnet152', pretrained=False, result_num=config.n)
+    net = PSENet(backbone='resnet50', pretrained=False, result_num=config.n)
     model = Pytorch_model(model_path, net=net, scale=1, gpu_id=0)
     # for i in range(100):
     #     model.predict(img_path)
-    preds, boxes_list = model.predict(img_path)
+    preds, boxes_list,t = model.predict(img_path)
+    print(boxes_list)
     show_img(preds)
     img = draw_bbox(img_path, boxes_list, color=(0, 0, 255))
     cv2.imwrite('result.jpg', img)

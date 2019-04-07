@@ -46,15 +46,15 @@ def main(model_path, backbone, scale, path, save_path, gpu_id):
 
 
 if __name__ == '__main__':
-    os.environ['CUDA_VISIBLE_DEVICES'] = str('0')
+    os.environ['CUDA_VISIBLE_DEVICES'] = str('1')
     backbone = 'resnet50'
     scale = 4
-    model_path = 'output/psenet_icd2015_resnet50_my_loss_0.0001_author_crop_adam_newcrop_warm_up/best_r0.568127_p0.828652_f10.674093.pth'
+    model_path = 'output/psenet_icd2015_resnet50_author_crop_adam_warm_up_authorloss/best_r0.569090_p0.830056_f10.675236.pth'
     data_path = '/data2/dataset/ICD15/test/img'
     gt_path = '/data2/dataset/ICD15/test/gt'
-    save_path = './result2'
+    save_path = './result/_scale{}'.format(scale)
     gpu_id = 0
-    print(model_path)
+    print('backbone:{},scale:{},model_path:{}'.format(backbone,scale,model_path))
     save_path = main(model_path, backbone, scale, data_path, save_path, gpu_id=gpu_id)
     result = cal_recall_precison_f1(gt_path=gt_path, result_path=save_path)
     print(result)
