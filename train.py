@@ -55,8 +55,9 @@ def train_epoch(net, optimizer, scheduler, train_loader, device, criterion, epoc
     net.train()
     train_loss = 0.
     start = time.time()
-    # scheduler.step()
-    lr = adjust_learning_rate(optimizer, epoch)  # str(scheduler.get_lr()[0])
+    scheduler.step()
+    # lr = adjust_learning_rate(optimizer, epoch)
+    lr = scheduler.get_lr()[0]
     for i, (images, labels, training_mask) in enumerate(train_loader):
         cur_batch = images.size()[0]
         images, labels, training_mask = images.to(device), labels.to(device), training_mask.to(device)
@@ -131,7 +132,7 @@ def eval(model, save_path, test_path, device):
         tensor = tensor.to(device)
         with torch.no_grad():
             preds = model(tensor)
-            _, boxes_list = pse_decode(preds[0], model.scale)
+            _, boxes_list = pse_decode(preds[0], config.scale)
         np.savetxt(save_name, boxes_list.reshape(-1, 8), delimiter=',', fmt='%d')
     # 开始计算 recall precision f1
     result_dict = cal_recall_precison_f1(gt_path, save_path)
@@ -166,7 +167,7 @@ def main():
                                    num_workers=int(config.workers))
 
     writer = SummaryWriter(config.output_dir)
-    model = PSENet(backbone=config.backbone, pretrained=config.pretrained, result_num=config.n)
+    model = PSENet(backbone=config.backbone, pretrained=config.pretrained, result_num=config.n, scale=config.scale)
     if not config.pretrained and not config.restart_training:
         model.apply(weights_init)
 
