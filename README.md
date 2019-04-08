@@ -68,7 +68,7 @@ my implementation with my loss use adam and MultiStepLR
 | PSENet-2s with resnet152 batch 4 | 85.36 | 79.73 | 82.45 | 2.56 |
 | PSENet-4s with resnet152 batch 4 | 83.95 | 78.86 | 81.33 | 2.99 |
 
-my implementation with author loss use adam and warm_up (to be test 50)
+my implementation with author loss use adam and warm_up
 
 | Method                   | Precision (%) | Recall (%) | F-measure (%) | FPS(1080Ti) |
 |--------------------------|---------------|------------|---------------|-----|
