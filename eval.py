@@ -48,7 +48,7 @@ def main(model_path, backbone, scale, path, save_path, gpu_id):
 if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = str('2')
     backbone = 'resnet152'
-    scale = 1
+    scale = 4
     model_path = 'output/psenet_icd2015_resnet152_author_crop_adam_warm_up_myloss/best_r0.714011_p0.708214_f10.711100.pth'
     data_path = '/data2/dataset/ICD15/test/img'
     gt_path = '/data2/dataset/ICD15/test/gt'

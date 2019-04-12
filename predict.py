@@ -8,7 +8,7 @@ import cv2
 import time
 import numpy as np
 
-from model.pse import decode as pse_decode, decode_author,decode_sigmoid
+from pse import decode as pse_decode
 
 
 class Pytorch_model:
@@ -55,7 +55,7 @@ class Pytorch_model:
         # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         h, w = img.shape[:2]
 
-        scale = long_size * 1.0 / max(h, w)
+        scale = long_size / max(h, w)
         img = cv2.resize(img, None, fx=scale, fy=scale)
         # 将图片由(w,h)变为(1,img_channel,h,w)
         tensor = transforms.ToTensor()(img)
@@ -66,8 +66,8 @@ class Pytorch_model:
             torch.cuda.synchronize()
             start = time.time()
             preds = self.net(tensor)
-            preds, boxes_list = decode_sigmoid(preds[0], self.scale)
-            scale = (preds.shape[1] * 1.0 / w, preds.shape[0] * 1.0 / h)
+            preds, boxes_list = pse_decode(preds[0], self.scale)
+            scale = (preds.shape[1] / w, preds.shape[0] / h)
             # print(scale)
             # preds, boxes_list = decode(preds,num_pred=-1)
             if len(boxes_list):

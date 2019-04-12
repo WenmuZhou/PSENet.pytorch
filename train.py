@@ -20,10 +20,9 @@ from tensorboardX import SummaryWriter
 
 from dataset.data_utils import MyDataset
 from model import PSENet
-# from model.loss import PSELoss
-from model.authot_loss import PSELoss
+from model.loss import PSELoss
 from utils.utils import load_checkpoint, save_checkpoint, setup_logger
-from model.pse import decode as pse_decode
+from pse import decode as pse_decode
 from cal_recall import cal_recall_precison_f1
 
 
@@ -117,7 +116,7 @@ def eval(model, save_path, test_path, device):
         shutil.rmtree(save_path, ignore_errors=True)
     if not os.path.exists(save_path):
         os.makedirs(save_path)
-
+    long_size = 2240
     # 预测所有测试图片
     img_paths = [os.path.join(img_path, x) for x in os.listdir(img_path)]
     for img_path in tqdm(img_paths, desc='test model'):
@@ -126,13 +125,20 @@ def eval(model, save_path, test_path, device):
 
         assert os.path.exists(img_path), 'file is not exists'
         img = cv2.imread(img_path)
+        h, w = img.shape[:2]
+        if max(h, w) > long_size:
+            scale = long_size / max(h, w)
+            img = cv2.resize(img, None, fx=scale, fy=scale)
         # 将图片由(w,h)变为(1,img_channel,h,w)
         tensor = transforms.ToTensor()(img)
         tensor = tensor.unsqueeze_(0)
         tensor = tensor.to(device)
         with torch.no_grad():
             preds = model(tensor)
-            _, boxes_list = pse_decode(preds[0], config.scale)
+            preds, boxes_list = pse_decode(preds[0], config.scale)
+            scale = (preds.shape[1] * 1.0 / w, preds.shape[0] * 1.0 / h)
+            if len(boxes_list):
+                boxes_list = boxes_list / scale
         np.savetxt(save_name, boxes_list.reshape(-1, 8), delimiter=',', fmt='%d')
     # 开始计算 recall precision f1
     result_dict = cal_recall_precison_f1(gt_path, save_path)

@@ -9,12 +9,12 @@ output_dir = 'output/psenet_icd2015_resnet152_4gpu_author_crop_adam_MultiStepLR_
 data_shape = 640
 
 # train config
-gpu_id = '0,1,2,3'
+gpu_id = '2'
 workers = 12
 start_epoch = 0
 epochs = 600
 
-train_batch_size = 16
+train_batch_size = 4
 
 lr = 1e-4
 end_lr = 1e-7
