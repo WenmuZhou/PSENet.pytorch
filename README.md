@@ -55,7 +55,7 @@ my implementation with my loss use adam and warm_up
 | PSENet-4s with resnet50 batch 8  | 81.00 | 76.55 | 78.71 | 4.43 |
 | PSENet-1s with resnet152 batch 4 | 85.45 | 80.06 | 82.67 | 1.48 |
 | PSENet-2s with resnet152 batch 4 | 85.42 | 80.11 | 82.68 | 2.56 |
-| PSENet-4s with resnet152 batch 4 | 83.77 | 79.05 | 81.34 | 2.99 |
+| PSENet-4s with resnet152 batch 4 | 83.93 | 79.00 | 81.39 | 2.99 |
 
 my implementation with my loss use adam and MultiStepLR
 

@@ -67,7 +67,8 @@ class Pytorch_model:
             start = time.time()
             preds = self.net(tensor)
             preds, boxes_list = decode_sigmoid(preds[0], self.scale)
-            scale = (preds.shape[0] * 1.0 / h, preds.shape[1] * 1.0 / w)
+            scale = (preds.shape[1] * 1.0 / w, preds.shape[0] * 1.0 / h)
+            # print(scale)
             # preds, boxes_list = decode(preds,num_pred=-1)
             if len(boxes_list):
                 boxes_list = boxes_list / scale
@@ -100,7 +101,7 @@ if __name__ == '__main__':
 
     os.environ['CUDA_VISIBLE_DEVICES'] = str('2')
 
-    model_path = 'output/psenet_icd2015_resnet50_my_loss_0.0001_author_crop_adam_newcrop_warm_up_authorloss/PSENet_532_loss0.342119_r0.565720_p0.828048_f10.672197.pth'
+    model_path = 'output/psenet_icd2015_resnet152_author_crop_adam_warm_up_myloss/best_r0.714011_p0.708214_f10.711100.pth'
 
     # model_path = 'output/psenet_icd2015_new_loss/final.pth'
     img_id = 10
@@ -111,7 +112,7 @@ if __name__ == '__main__':
 
     # img_path = '/data1/gcz/拍照清单数据集_备份/87436979.jpg'
     # 初始化网络
-    net = PSENet(backbone='resnet50', pretrained=False, result_num=config.n)
+    net = PSENet(backbone='resnet152', pretrained=False, result_num=config.n)
     model = Pytorch_model(model_path, net=net, scale=1, gpu_id=0)
     # for i in range(100):
     #     model.predict(img_path)
