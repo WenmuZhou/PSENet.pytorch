@@ -12,7 +12,11 @@
 
 
 ### Download
-resnet50 and resnet152 model on icdar 2015: [bauduyun](https://pan.baidu.com/s/1rN0oGBRsdUYmcQUayMZUOA) extract code: rxjf
+resnet50 and resnet152 model on icdar 2015: 
+
+1. [bauduyun](https://pan.baidu.com/s/1rN0oGBRsdUYmcQUayMZUOA) extract code: rxjf 
+
+2. [google drive](https://drive.google.com/drive/folders/1r3Q1GJ5990WYrwXKT29aHvfQNW92QkXv?usp=sharing)
 
 ## Train
 1. config the `trainroot`,`testroot`in [config.py](config.py)
