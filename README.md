@@ -18,6 +18,18 @@ resnet50 and resnet152 model on icdar 2015:
 
 2. [google drive](https://drive.google.com/drive/folders/1r3Q1GJ5990WYrwXKT29aHvfQNW92QkXv?usp=sharing)
 
+## Data Preparation
+```
+img
+│   1.jpg
+│   2.jpg   
+│		...
+gt
+│   gt_1.txt
+│   gt_2.txt
+|		...
+```
+
 ## Train
 1. config the `trainroot`,`testroot`in [config.py](config.py)
 2. use fellow script to run
