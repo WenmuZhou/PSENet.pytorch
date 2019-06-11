@@ -106,11 +106,9 @@ if __name__ == '__main__':
     # model_path = 'output/psenet_icd2015_new_loss/final.pth'
     img_id = 10
     img_path = '/data2/dataset/ICD15/test/img/img_{}.jpg'.format(img_id)
-    # img_path = '0.jpg'
     label_path = '/data2/dataset/ICD15/test/gt/gt_img_{}.txt'.format(img_id)
     label = _get_annotation(label_path)
 
-    # img_path = '/data1/gcz/拍照清单数据集_备份/87436979.jpg'
     # 初始化网络
     net = PSENet(backbone='resnet152', pretrained=False, result_num=config.n)
     model = Pytorch_model(model_path, net=net, scale=1, gpu_id=0)
