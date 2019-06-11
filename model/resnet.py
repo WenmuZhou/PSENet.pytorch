@@ -6,6 +6,7 @@ import torch.nn as nn
 import math
 import logging
 import torch.utils.model_zoo as model_zoo
+import torchvision.models.resnet
 
 logger = logging.getLogger('project')
 
@@ -13,6 +14,8 @@ __all__ = ['ResNet', 'resnet50', 'resnet101',
            'resnet152']
 
 model_urls = {
+    'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
+    'resnet34': 'https://download.pytorch.org/models/resnet34-333f7ec4.pth',
     'resnet50': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
     'resnet101': 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth',
     'resnet152': 'https://download.pytorch.org/models/resnet152-b121ed2d.pth',
@@ -151,13 +154,35 @@ class ResNet(nn.Module):
         x = self.conv1(input)
         x = self.bn1(x)
         x = self.relu(x)
-        c1 = self.maxpool(x)
-        c2 = self.layer1(c1)
+        x = self.maxpool(x)
+        c2 = self.layer1(x)
         c3 = self.layer2(c2)
         c4 = self.layer3(c3)
         c5 = self.layer4(c4)
-        return c1, c2, c3, c4, c5
+        return c2, c3, c4, c5
 
+def resnet18(pretrained=False, **kwargs):
+    """Constructs a ResNet-18 model.
+
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+    """
+    model = ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
+    if pretrained:
+        model._load_pretrained_model(model_urls['resnet18'])
+    return model
+
+
+def resnet34(pretrained=False, **kwargs):
+    """Constructs a ResNet-34 model.
+
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+    """
+    model = ResNet(BasicBlock, [3, 4, 6, 3], **kwargs)
+    if pretrained:
+        model._load_pretrained_model(model_urls['resnet34'])
+    return model
 
 def resnet50(pretrained=False, **kwargs):
     """Constructs a ResNet-50 model.
@@ -197,6 +222,7 @@ def resnet152(pretrained=False, **kwargs):
 
 if __name__ == '__main__':
     x = torch.zeros(1, 3, 640, 640)
-    net = resnet101(result_num=8)
+    net = resnet50()
     y = net(x)
-    print(y.shape)
+    for u in y:
+        print(u.shape)
