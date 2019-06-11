@@ -4,9 +4,9 @@
 import torch
 from torch import nn
 import torch.nn.functional as F
-from models.resnet import resnet18, resnet34, resnet50, resnet101, resnet152
-from models.mobilenetv3 import MobileNetV3_Large, MobileNetV3_Small
-from models.ShuffleNetV2 import shufflenet_v2_x1_0
+from model.resnet import resnet18, resnet34, resnet50, resnet101, resnet152
+from model.mobilenetv3 import MobileNetV3_Large, MobileNetV3_Small
+from model.ShuffleNetV2 import shufflenet_v2_x1_0
 
 d = {'resnet18': {'model': resnet18, 'out': [64, 128, 256, 512]},
      'resnet34': {'model': resnet34, 'out': [64, 128, 256, 512]},
