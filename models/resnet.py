@@ -148,7 +148,7 @@ class ResNet(nn.Module):
                 model_dict[k] = v
         state_dict.update(model_dict)
         self.load_state_dict(state_dict)
-        logger.info('load pretrained model from imagenet')
+        logger.info('load pretrained models from imagenet')
 
     def forward(self, input):
         x = self.conv1(input)
@@ -162,10 +162,10 @@ class ResNet(nn.Module):
         return c2, c3, c4, c5
 
 def resnet18(pretrained=False, **kwargs):
-    """Constructs a ResNet-18 model.
+    """Constructs a ResNet-18 models.
 
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        pretrained (bool): If True, returns a models pre-trained on ImageNet
     """
     model = ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
     if pretrained:
@@ -174,10 +174,10 @@ def resnet18(pretrained=False, **kwargs):
 
 
 def resnet34(pretrained=False, **kwargs):
-    """Constructs a ResNet-34 model.
+    """Constructs a ResNet-34 models.
 
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        pretrained (bool): If True, returns a models pre-trained on ImageNet
     """
     model = ResNet(BasicBlock, [3, 4, 6, 3], **kwargs)
     if pretrained:
@@ -185,10 +185,10 @@ def resnet34(pretrained=False, **kwargs):
     return model
 
 def resnet50(pretrained=False, **kwargs):
-    """Constructs a ResNet-50 model.
+    """Constructs a ResNet-50 models.
 
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        pretrained (bool): If True, returns a models pre-trained on ImageNet
     """
     model = ResNet(Bottleneck, [3, 4, 6, 3], **kwargs)
     if pretrained:
@@ -197,10 +197,10 @@ def resnet50(pretrained=False, **kwargs):
 
 
 def resnet101(pretrained=False, **kwargs):
-    """Constructs a ResNet-101 model.
+    """Constructs a ResNet-101 models.
 
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        pretrained (bool): If True, returns a models pre-trained on ImageNet
     """
     model = ResNet(Bottleneck, [3, 4, 23, 3], **kwargs)
     if pretrained:
@@ -209,10 +209,10 @@ def resnet101(pretrained=False, **kwargs):
 
 
 def resnet152(pretrained=False, **kwargs):
-    """Constructs a ResNet-152 model.
+    """Constructs a ResNet-152 models.
 
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        pretrained (bool): If True, returns a models pre-trained on ImageNet
     """
     model = ResNet(Bottleneck, [3, 8, 36, 3], **kwargs)
     if pretrained:

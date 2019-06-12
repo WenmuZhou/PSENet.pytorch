@@ -8,7 +8,7 @@ import config
 import os
 import cv2
 from tqdm import tqdm
-from model import PSENet
+from models import PSENet
 from predict import Pytorch_model
 from cal_recall.script import cal_recall_precison_f1
 from utils import draw_bbox

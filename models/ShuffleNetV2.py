@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import logging
 from torchvision.models.utils import load_state_dict_from_url
+
 logger = logging.getLogger('project')
 
 __all__ = [
@@ -138,7 +139,7 @@ def _shufflenetv2(arch, pretrained, progress, *args, **kwargs):
         else:
             state_dict = load_state_dict_from_url(model_url, progress=progress)
             model.load_state_dict(state_dict,strict=False)
-            logger.info('load pretrained model from imagenet')
+            logger.info('load pretrained models from imagenet')
     return model
 
 
@@ -149,7 +150,7 @@ def shufflenet_v2_x0_5(pretrained=False, progress=True, **kwargs):
     <https://arxiv.org/abs/1807.11164>`_.
 
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        pretrained (bool): If True, returns a models pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
     return _shufflenetv2('shufflenetv2_x0.5', pretrained, progress,
@@ -163,7 +164,7 @@ def shufflenet_v2_x1_0(pretrained=False, progress=True, **kwargs):
     <https://arxiv.org/abs/1807.11164>`_.
 
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        pretrained (bool): If True, returns a models pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
     return _shufflenetv2('shufflenetv2_x1.0', pretrained, progress,
@@ -177,7 +178,7 @@ def shufflenet_v2_x1_5(pretrained=False, progress=True, **kwargs):
     <https://arxiv.org/abs/1807.11164>`_.
 
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        pretrained (bool): If True, returns a models pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
     return _shufflenetv2('shufflenetv2_x1.5', pretrained, progress,
@@ -191,7 +192,7 @@ def shufflenet_v2_x2_0(pretrained=False, progress=True, **kwargs):
     <https://arxiv.org/abs/1807.11164>`_.
 
     Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        pretrained (bool): If True, returns a models pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
     return _shufflenetv2('shufflenetv2_x2.0', pretrained, progress,

@@ -19,8 +19,8 @@ import torchvision.utils as vutils
 from tensorboardX import SummaryWriter
 
 from dataset.data_utils import MyDataset
-from model import PSENet
-from model.loss import PSELoss
+from models import PSENet
+from models.loss import PSELoss
 from utils.utils import load_checkpoint, save_checkpoint, setup_logger
 from pse import decode as pse_decode
 from cal_recall import cal_recall_precison_f1
@@ -119,7 +119,7 @@ def eval(model, save_path, test_path, device):
     long_size = 2240
     # 预测所有测试图片
     img_paths = [os.path.join(img_path, x) for x in os.listdir(img_path)]
-    for img_path in tqdm(img_paths, desc='test model'):
+    for img_path in tqdm(img_paths, desc='test models'):
         img_name = os.path.basename(img_path).split('.')[0]
         save_name = os.path.join(save_path, 'res_' + img_name + '.txt')
 
@@ -182,9 +182,9 @@ def main():
         model = nn.DataParallel(model)
     model = model.to(device)
     # dummy_input = torch.autograd.Variable(torch.Tensor(1, 3, 600, 800).to(device))
-    # writer.add_graph(model=model, input_to_model=dummy_input)
+    # writer.add_graph(models=models, input_to_model=dummy_input)
     criterion = PSELoss(Lambda=config.Lambda, ratio=config.OHEM_ratio, reduction='mean')
-    # optimizer = torch.optim.SGD(model.parameters(), lr=config.lr, momentum=0.99)
+    # optimizer = torch.optim.SGD(models.parameters(), lr=config.lr, momentum=0.99)
     optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
     if config.checkpoint != '' and not config.restart_training:
         start_epoch = load_checkpoint(config.checkpoint, model, logger, device)
@@ -198,7 +198,7 @@ def main():
     all_step = len(train_loader)
     logger.info('train dataset has {} samples,{} in dataloader'.format(train_data.__len__(), all_step))
     epoch = 0
-    best_model = {'recall': 0, 'precision': 0, 'f1': 0, 'model': ''}
+    best_model = {'recall': 0, 'precision': 0, 'f1': 0, 'models': ''}
     try:
         for epoch in range(start_epoch, config.epochs):
             start = time.time()
@@ -208,7 +208,7 @@ def main():
                 epoch, config.epochs, train_loss, time.time() - start, lr))
             # net_save_path = '{}/PSENet_{}_loss{:.6f}.pth'.format(config.output_dir, epoch,
             #                                                                               train_loss)
-            # save_checkpoint(net_save_path, model, optimizer, epoch, logger)
+            # save_checkpoint(net_save_path, models, optimizer, epoch, logger)
             if (0.3 < train_loss < 0.4 and epoch % 4 == 0) or train_loss < 0.3:
                 recall, precision, f1 = eval(model, os.path.join(config.output_dir, 'output'), config.testroot, device)
                 logger.info('test: recall: {:.6f}, precision: {:.6f}, f1: {:.6f}'.format(recall, precision, f1))
@@ -223,7 +223,7 @@ def main():
                     best_model['recall'] = recall
                     best_model['precision'] = precision
                     best_model['f1'] = f1
-                    best_model['model'] = net_save_path
+                    best_model['models'] = net_save_path
                 writer.add_scalar(tag='Test/recall', scalar_value=recall, global_step=epoch)
                 writer.add_scalar(tag='Test/precision', scalar_value=precision, global_step=epoch)
                 writer.add_scalar(tag='Test/f1', scalar_value=f1, global_step=epoch)
@@ -231,8 +231,8 @@ def main():
     except KeyboardInterrupt:
         save_checkpoint('{}/final.pth'.format(config.output_dir), model, optimizer, epoch, logger)
     finally:
-        if best_model['model']:
-            shutil.copy(best_model['model'],
+        if best_model['models']:
+            shutil.copy(best_model['models'],
                         '{}/best_r{:.6f}_p{:.6f}_f1{:.6f}.pth'.format(config.output_dir, best_model['recall'],
                                                                       best_model['precision'], best_model['f1']))
             logger.info(best_model)

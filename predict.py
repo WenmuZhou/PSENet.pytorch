@@ -40,7 +40,7 @@ class Pytorch_model:
             except:
                 net.load_state_dict(self.net)
             self.net = net
-            print('load model')
+            print('load models')
         self.net.eval()
 
     def predict(self, img: str, long_size: int = 2240):
@@ -95,7 +95,7 @@ def _get_annotation(label_path):
 
 if __name__ == '__main__':
     import config
-    from model import PSENet
+    from models import PSENet
     import matplotlib.pyplot as plt
     from utils.utils import show_img, draw_bbox
 
@@ -113,7 +113,7 @@ if __name__ == '__main__':
     net = PSENet(backbone='resnet152', pretrained=False, result_num=config.n)
     model = Pytorch_model(model_path, net=net, scale=1, gpu_id=0)
     # for i in range(100):
-    #     model.predict(img_path)
+    #     models.predict(img_path)
     preds, boxes_list,t = model.predict(img_path)
     print(boxes_list)
     show_img(preds)

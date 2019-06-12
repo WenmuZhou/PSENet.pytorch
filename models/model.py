@@ -4,18 +4,18 @@
 import torch
 from torch import nn
 import torch.nn.functional as F
-from model.resnet import resnet18, resnet34, resnet50, resnet101, resnet152
-from model.mobilenetv3 import MobileNetV3_Large, MobileNetV3_Small
-from model.ShuffleNetV2 import shufflenet_v2_x1_0
+from models.resnet import resnet18, resnet34, resnet50, resnet101, resnet152
+from models.mobilenetv3 import MobileNetV3_Large, MobileNetV3_Small
+from models.ShuffleNetV2 import shufflenet_v2_x1_0
 
-d = {'resnet18': {'model': resnet18, 'out': [64, 128, 256, 512]},
-     'resnet34': {'model': resnet34, 'out': [64, 128, 256, 512]},
-     'resnet50': {'model': resnet50, 'out': [256, 512, 1024, 2048]},
-     'resnet101': {'model': resnet101, 'out': [256, 512, 1024, 2048]},
-     'resnet152': {'model': resnet152, 'out': [256, 512, 1024, 2048]},
-     'MobileNetV3_Large': {'model': MobileNetV3_Large, 'out': [24, 40, 160, 160]},
-     'MobileNetV3_Small': {'model': MobileNetV3_Small, 'out': [16, 24, 48, 96]},
-     'shufflenetv2': {'model': shufflenet_v2_x1_0, 'out': [24, 116, 232, 464]}}
+d = {'resnet18': {'models': resnet18, 'out': [64, 128, 256, 512]},
+     'resnet34': {'models': resnet34, 'out': [64, 128, 256, 512]},
+     'resnet50': {'models': resnet50, 'out': [256, 512, 1024, 2048]},
+     'resnet101': {'models': resnet101, 'out': [256, 512, 1024, 2048]},
+     'resnet152': {'models': resnet152, 'out': [256, 512, 1024, 2048]},
+     'MobileNetV3_Large': {'models': MobileNetV3_Large, 'out': [24, 40, 160, 160]},
+     'MobileNetV3_Small': {'models': MobileNetV3_Small, 'out': [16, 24, 48, 96]},
+     'shufflenetv2': {'models': shufflenet_v2_x1_0, 'out': [24, 116, 232, 464]}}
 inplace = True
 
 
@@ -25,7 +25,7 @@ class PSENet(nn.Module):
         assert backbone in d, 'backbone must in: {}'.format(d)
         self.scale = scale
         conv_out = 256
-        model, out = d[backbone]['model'], d[backbone]['out']
+        model, out = d[backbone]['models'], d[backbone]['out']
         self.backbone = model(pretrained=pretrained)
 
         # Top layer
