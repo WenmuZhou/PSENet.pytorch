@@ -16,7 +16,7 @@ from torch import nn
 import torch.utils.data as Data
 from torchvision import transforms
 import torchvision.utils as vutils
-from tensorboardX import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 
 from dataset.data_utils import MyDataset
 from models import PSENet
