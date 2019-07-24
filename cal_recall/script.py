@@ -133,7 +133,7 @@ def evaluate_method(gtFilePath, submFilePath, evaluationParams):
     Rectangle = namedtuple('Rectangle', 'xmin ymin xmax ymax')
 
     gt = rrc_evaluation_funcs.load_folder_file(gtFilePath, evaluationParams['GT_SAMPLE_NAME_2_ID'])
-    subm = rrc_evaluation_funcs.load_folder_file(submFilePath, evaluationParams['DET_SAMPLE_NAME_2_ID'], True)
+    subm = rrc_evaluation_funcs.load_folder_file(submFilePath, evaluationParams['DET_SAMPLE_NAME_2_ID'])
 
     numGlobalCareGt = 0;
     numGlobalCareDet = 0;
