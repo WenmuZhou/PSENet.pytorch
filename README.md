@@ -20,6 +20,7 @@ resnet50 and resnet152 model on icdar 2015:
 2. [google drive](https://drive.google.com/drive/folders/1r3Q1GJ5990WYrwXKT29aHvfQNW92QkXv?usp=sharing)
 
 ## Data Preparation
+follow icdar15 dataset format
 ```
 img
 │   1.jpg
