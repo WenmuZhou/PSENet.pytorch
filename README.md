@@ -34,7 +34,7 @@ gt
 
 ## Train
 1. config the `trainroot`,`testroot`in [config.py](config.py)
-2. use fellow script to run
+2. use following script to run
 ```sh
 python3 train.py
 ```
@@ -43,7 +43,7 @@ python3 train.py
 [eval.py](eval.py) is used to test model on test dataset
 
 1. config `model_path`, `data_path`, `gt_path`, `save_path` in [eval.py](eval.py)
-2. use fellow script to test
+2. use following script to test
 ```sh
 python3 eval.py
 ```
@@ -52,7 +52,7 @@ python3 eval.py
 [predict.py](predict.py) is used to inference on single image
 
 1. config `model_path`, `img_path`, `gt_path`, `save_path` in [predict.py](predict.py)
-2. use fellow script to predict
+2. use following script to predict
 ```sh
 python3 predict.py
 ```
