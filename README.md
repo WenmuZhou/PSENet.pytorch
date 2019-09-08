@@ -57,7 +57,6 @@ python3 eval.py
 python3 predict.py
 ```
 
-The project is still under development.
 
 <h2 id="Performance">Performance</h2>
 
