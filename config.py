@@ -24,8 +24,11 @@ weight_decay = 5e-4
 warm_up_epoch = 6
 warm_up_lr = lr * lr_gamma
 
+display_input_images = False
+display_output_images = False
 display_interval = 10
 show_images_interval = 50
+
 pretrained = True
 restart_training = True
 checkpoint = ''

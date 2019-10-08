@@ -8,6 +8,7 @@ import config
 os.environ['CUDA_VISIBLE_DEVICES'] = config.gpu_id
 
 import shutil
+import glob
 import time
 import numpy as np
 import torch
@@ -87,23 +88,26 @@ def train_epoch(net, optimizer, scheduler, train_loader, device, criterion, epoc
             start = time.time()
 
         if i % config.show_images_interval == 0:
-            # show images on tensorboard
-            x = vutils.make_grid(images.detach().cpu(), nrow=4, normalize=True, scale_each=True, padding=20)
-            writer.add_image(tag='input/image', img_tensor=x, global_step=cur_step)
+            if config.display_input_images:
+                # show images on tensorboard
+                x = vutils.make_grid(images.detach().cpu(), nrow=4, normalize=True, scale_each=True, padding=20)
+                writer.add_image(tag='input/image', img_tensor=x, global_step=cur_step)
 
-            show_label = labels.detach().cpu()
-            b, c, h, w = show_label.size()
-            show_label = show_label.reshape(b * c, h, w)
-            show_label = vutils.make_grid(show_label.unsqueeze(1), nrow=config.n, normalize=False, padding=20,
-                                          pad_value=1)
-            writer.add_image(tag='input/label', img_tensor=show_label, global_step=cur_step)
+                show_label = labels.detach().cpu()
+                b, c, h, w = show_label.size()
+                show_label = show_label.reshape(b * c, h, w)
+                show_label = vutils.make_grid(show_label.unsqueeze(1), nrow=config.n, normalize=False, padding=20,
+                                              pad_value=1)
+                writer.add_image(tag='input/label', img_tensor=show_label, global_step=cur_step)
 
-            y1 = torch.sigmoid(y1)
-            show_y = y1.detach().cpu()
-            b, c, h, w = show_y.size()
-            show_y = show_y.reshape(b * c, h, w)
-            show_y = vutils.make_grid(show_y.unsqueeze(1), nrow=config.n, normalize=False, padding=20, pad_value=1)
-            writer.add_image(tag='output/preds', img_tensor=show_y, global_step=cur_step)
+            if config.display_output_images:
+                y1 = torch.sigmoid(y1)
+                show_y = y1.detach().cpu()
+                b, c, h, w = show_y.size()
+                show_y = show_y.reshape(b * c, h, w)
+                show_y = vutils.make_grid(show_y.unsqueeze(1), nrow=config.n, normalize=False, padding=20, pad_value=1)
+                writer.add_image(tag='output/preds', img_tensor=show_y, global_step=cur_step)
+    writer.add_scalar(tag='Train_epoch/loss', scalar_value=train_loss / all_step, global_step=epoch)
     return train_loss / all_step, lr
 
 
@@ -126,9 +130,9 @@ def eval(model, save_path, test_path, device):
         assert os.path.exists(img_path), 'file is not exists'
         img = cv2.imread(img_path)
         h, w = img.shape[:2]
-        if max(h, w) > long_size:
-            scale = long_size / max(h, w)
-            img = cv2.resize(img, None, fx=scale, fy=scale)
+        #if max(h, w) > long_size:
+        scale = long_size / max(h, w)
+        img = cv2.resize(img, None, fx=scale, fy=scale)
         # 将图片由(w,h)变为(1,img_channel,h,w)
         tensor = transforms.ToTensor()(img)
         tensor = tensor.unsqueeze_(0)
@@ -220,10 +224,30 @@ def main():
                                                                                               f1)
                 save_checkpoint(net_save_path, model, optimizer, epoch, logger)
                 if f1 > best_model['f1']:
+                    best_path = glob.glob(config.output_dir + '/Best_*.pth')
+                    for b_path in best_path:
+                        if os.path.exists(b_path):
+                            os.remove(b_path)
+
                     best_model['recall'] = recall
                     best_model['precision'] = precision
                     best_model['f1'] = f1
                     best_model['models'] = net_save_path
+
+                    best_save_path = '{}/Best_{}_r{:.6f}_p{:.6f}_f1{:.6f}.pth'.format(config.output_dir, epoch,
+                                                                                      recall,
+                                                                                      precision,
+                                                                                      f1)
+                    if os.path.exists(net_save_path):
+                        shutil.copyfile(net_save_path, best_save_path)
+                    else:
+                        save_checkpoint(best_save_path, model, optimizer, epoch, logger)
+
+                    pse_path = glob.glob(config.output_dir + '/PSENet_*.pth')
+                    for p_path in pse_path:
+                        if os.path.exists(p_path):
+                            os.remove(p_path)
+
                 writer.add_scalar(tag='Test/recall', scalar_value=recall, global_step=epoch)
                 writer.add_scalar(tag='Test/precision', scalar_value=precision, global_step=epoch)
                 writer.add_scalar(tag='Test/f1', scalar_value=f1, global_step=epoch)
@@ -232,9 +256,6 @@ def main():
         save_checkpoint('{}/final.pth'.format(config.output_dir), model, optimizer, epoch, logger)
     finally:
         if best_model['models']:
-            shutil.copy(best_model['models'],
-                        '{}/best_r{:.6f}_p{:.6f}_f1{:.6f}.pth'.format(config.output_dir, best_model['recall'],
-                                                                      best_model['precision'], best_model['f1']))
             logger.info(best_model)
 
 
