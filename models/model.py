@@ -64,7 +64,10 @@ class PSENet(nn.Module):
         x = self.conv(x)
         x = self.out_conv(x)
 
-        x = F.interpolate(x, size=(H // self.scale, W // self.scale), mode='bilinear', align_corners=True)
+        if self.train:
+            x = F.interpolate(x, size=(H, W), mode='bilinear', align_corners=True)
+        else:
+            x = F.interpolate(x, size=(H // self.scale, W // self.scale), mode='bilinear', align_corners=True)
         return x
 
     def _upsample_add(self, x, y):
