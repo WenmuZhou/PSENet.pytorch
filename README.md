@@ -5,6 +5,7 @@
 * torchvision 0.3
 * pyclipper
 * opencv3
+* gcc 4.9+
 
 ## Update 
 ### 20190401
