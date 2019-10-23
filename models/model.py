@@ -31,34 +31,34 @@ class PSENet(nn.Module):
         # Top layer
         self.toplayer = nn.Sequential(nn.Conv2d(out[3], conv_out, kernel_size=1, stride=1, padding=0),
                                       nn.BatchNorm2d(conv_out),
-                                      nn.ReLU()
+                                      nn.ReLU(inplace=inplace)
                                       )
         # Lateral layers
         self.latlayer1 = nn.Sequential(nn.Conv2d(out[2], conv_out, kernel_size=1, stride=1, padding=0),
                                        nn.BatchNorm2d(conv_out),
-                                       nn.ReLU()
+                                       nn.ReLU(inplace=inplace)
                                        )
         self.latlayer2 = nn.Sequential(nn.Conv2d(out[1], conv_out, kernel_size=1, stride=1, padding=0),
                                        nn.BatchNorm2d(conv_out),
-                                       nn.ReLU()
+                                       nn.ReLU(inplace=inplace)
                                        )
         self.latlayer3 = nn.Sequential(nn.Conv2d(out[0], conv_out, kernel_size=1, stride=1, padding=0),
                                        nn.BatchNorm2d(conv_out),
-                                       nn.ReLU()
+                                       nn.ReLU(inplace=inplace)
                                        )
 
         # Smooth layers
         self.smooth1 = nn.Sequential(nn.Conv2d(conv_out, conv_out, kernel_size=3, stride=1, padding=1),
                                      nn.BatchNorm2d(conv_out),
-                                     nn.ReLU()
+                                     nn.ReLU(inplace=inplace)
                                      )
         self.smooth2 = nn.Sequential(nn.Conv2d(conv_out, conv_out, kernel_size=3, stride=1, padding=1),
                                      nn.BatchNorm2d(conv_out),
-                                     nn.ReLU()
+                                     nn.ReLU(inplace=inplace)
                                      )
         self.smooth3 = nn.Sequential(nn.Conv2d(conv_out, conv_out, kernel_size=3, stride=1, padding=1),
                                      nn.BatchNorm2d(conv_out),
-                                     nn.ReLU()
+                                     nn.ReLU(inplace=inplace)
                                      )
 
         self.conv = nn.Sequential(
