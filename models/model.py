@@ -20,7 +20,7 @@ inplace = True
 
 
 class PSENet(nn.Module):
-    def __init__(self, backbone, result_num, scale: int = 1, pretrained=False):
+    def __init__(self, backbone, result_num=6, scale: int = 1, pretrained=False):
         super(PSENet, self).__init__()
         assert backbone in d, 'backbone must in: {}'.format(d)
         self.scale = scale
@@ -53,11 +53,10 @@ class PSENet(nn.Module):
         # Top-down
         p5 = self.toplayer(c5)
         p4 = self._upsample_add(p5, self.latlayer1(c4))
-        p3 = self._upsample_add(p4, self.latlayer2(c3))
-        p2 = self._upsample_add(p3, self.latlayer3(c2))
-        # Smooth
         p4 = self.smooth1(p4)
+        p3 = self._upsample_add(p4, self.latlayer2(c3))
         p3 = self.smooth2(p3)
+        p2 = self._upsample_add(p3, self.latlayer3(c2))
         p2 = self.smooth3(p2)
 
         x = self._upsample_cat(p2, p3, p4, p5)
@@ -86,7 +85,7 @@ if __name__ == '__main__':
 
     device = torch.device('cpu')
     backbone = 'shufflenetv2'
-    net = PSENet(backbone=backbone, pretrained=False, result_num=1).to(device)
+    net = PSENet(backbone=backbone, pretrained=False, result_num=6).to(device)
     net.eval()
     x = torch.zeros(1, 3, 512, 512).to(device)
     start = time.time()
