@@ -27,18 +27,39 @@ class PSENet(nn.Module):
         conv_out = 256
         model, out = d[backbone]['models'], d[backbone]['out']
         self.backbone = model(pretrained=pretrained)
-
+        # Reduce channels
         # Top layer
-        self.toplayer = nn.Conv2d(out[3], conv_out, kernel_size=1, stride=1, padding=0)  # Reduce channels
+        self.toplayer = nn.Sequential(nn.Conv2d(out[3], conv_out, kernel_size=1, stride=1, padding=0),
+                                      nn.BatchNorm2d(conv_out),
+                                      nn.ReLU()
+                                      )
         # Lateral layers
-        self.latlayer1 = nn.Conv2d(out[2], conv_out, kernel_size=1, stride=1, padding=0)
-        self.latlayer2 = nn.Conv2d(out[1], conv_out, kernel_size=1, stride=1, padding=0)
-        self.latlayer3 = nn.Conv2d(out[0], conv_out, kernel_size=1, stride=1, padding=0)
+        self.latlayer1 = nn.Sequential(nn.Conv2d(out[2], conv_out, kernel_size=1, stride=1, padding=0),
+                                       nn.BatchNorm2d(conv_out),
+                                       nn.ReLU()
+                                       )
+        self.latlayer2 = nn.Sequential(nn.Conv2d(out[1], conv_out, kernel_size=1, stride=1, padding=0),
+                                       nn.BatchNorm2d(conv_out),
+                                       nn.ReLU()
+                                       )
+        self.latlayer3 = nn.Sequential(nn.Conv2d(out[0], conv_out, kernel_size=1, stride=1, padding=0),
+                                       nn.BatchNorm2d(conv_out),
+                                       nn.ReLU()
+                                       )
 
         # Smooth layers
-        self.smooth1 = nn.Conv2d(conv_out, conv_out, kernel_size=3, stride=1, padding=1)
-        self.smooth2 = nn.Conv2d(conv_out, conv_out, kernel_size=3, stride=1, padding=1)
-        self.smooth3 = nn.Conv2d(conv_out, conv_out, kernel_size=3, stride=1, padding=1)
+        self.smooth1 = nn.Sequential(nn.Conv2d(conv_out, conv_out, kernel_size=3, stride=1, padding=1),
+                                     nn.BatchNorm2d(conv_out),
+                                     nn.ReLU()
+                                     )
+        self.smooth2 = nn.Sequential(nn.Conv2d(conv_out, conv_out, kernel_size=3, stride=1, padding=1),
+                                     nn.BatchNorm2d(conv_out),
+                                     nn.ReLU()
+                                     )
+        self.smooth3 = nn.Sequential(nn.Conv2d(conv_out, conv_out, kernel_size=3, stride=1, padding=1),
+                                     nn.BatchNorm2d(conv_out),
+                                     nn.ReLU()
+                                     )
 
         self.conv = nn.Sequential(
             nn.Conv2d(conv_out * 4, conv_out, kernel_size=3, padding=1, stride=1),
