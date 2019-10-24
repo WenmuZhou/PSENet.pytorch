@@ -16,9 +16,9 @@
 ### Download
 resnet50 and resnet152 model on icdar 2015: 
 
-1. [bauduyun](https://pan.baidu.com/s/1rN0oGBRsdUYmcQUayMZUOA) extract code: rxjf 
+1. ~~[bauduyun](https://pan.baidu.com/s/1rN0oGBRsdUYmcQUayMZUOA) extract code: rxjf~~
 
-2. [google drive](https://drive.google.com/drive/folders/1r3Q1GJ5990WYrwXKT29aHvfQNW92QkXv?usp=sharing)
+2. ~~[google drive](https://drive.google.com/drive/folders/1r3Q1GJ5990WYrwXKT29aHvfQNW92QkXv?usp=sharing)~~
 
 ## Data Preparation
 follow icdar15 dataset format
