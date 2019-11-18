@@ -162,7 +162,7 @@ class MyDataset(data.Dataset):
         data_list = []
         for x in glob.glob(data_dir + '/img/*.jpg', recursive=True):
             d = pathlib.Path(x)
-            label_path = os.path.join(data_dir, 'gt', ('gt_' + str(d.stem) + '.txt'))
+            label_path = os.path.join(data_dir, 'gt', (str(d.stem) + '.txt'))
             bboxs, text = self._get_annotation(label_path)
             if len(bboxs) > 0:
                 data_list.append((x, bboxs, text))

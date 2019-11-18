@@ -3,9 +3,9 @@
 # @Author  : zhoujun
 
 # data config
-trainroot = '/data2/dataset/ICD15/train'
-testroot = '/data2/dataset/ICD15/test'
-output_dir = 'output/psenet_icd2015_resnet152_4gpu_author_crop_adam_MultiStepLR_authorloss'
+trainroot = '/home/shizai/datadisk2/tyin/images/'
+testroot = '/home/shizai/datadisk2/tyin/images/'
+output_dir = './output/psenet_gendata_resnet152_4gpu_author_crop_adam_MultiStepLR_authorloss'
 data_shape = 640
 
 # train config
