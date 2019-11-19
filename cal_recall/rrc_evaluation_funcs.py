@@ -318,7 +318,7 @@ def main_evaluation(p,default_evaluation_params_fn,validate_data_fn,evaluate_met
     """
     evalParams = default_evaluation_params_fn()
     if 'p' in p.keys():
-        evalParams.update( p['p'] if isinstance(p['p'], dict) else json.loads(p['p'][1:-1]) )
+        evalParams.update(p['p'] if isinstance(p['p'], dict) else json.loads(p['p'][1:-1]) )
 
     resDict={'calculated':True,'Message':'','method':'{}','per_sample':'{}'}    
     try:

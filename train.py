@@ -123,6 +123,7 @@ def eval(model, save_path, test_path, device):
     long_size = 2240
     # 预测所有测试图片
     img_paths = [os.path.join(img_path, x) for x in os.listdir(img_path)]
+    img_paths = img_paths[:2]
     for img_path in tqdm(img_paths, desc='test models'):
         img_name = os.path.basename(img_path).split('.')[0]
         save_name = os.path.join(save_path, 'res_' + img_name + '.txt')
@@ -130,7 +131,7 @@ def eval(model, save_path, test_path, device):
         assert os.path.exists(img_path), 'file is not exists'
         img = cv2.imread(img_path)
         h, w = img.shape[:2]
-        #if max(h, w) > long_size:
+        # if max(h, w) > long_size:
         scale = long_size / max(h, w)
         img = cv2.resize(img, None, fx=scale, fy=scale)
         # 将图片由(w,h)变为(1,img_channel,h,w)
@@ -144,8 +145,10 @@ def eval(model, save_path, test_path, device):
             if len(boxes_list):
                 boxes_list = boxes_list / scale
         np.savetxt(save_name, boxes_list.reshape(-1, 8), delimiter=',', fmt='%d')
-    # 开始计算 recall precision f1
+    # 开始计算 recall precision f
+    print('222', save_path)
     result_dict = cal_recall_precison_f1(gt_path, save_path)
+    print('111', result_dict)
     return result_dict['recall'], result_dict['precision'], result_dict['hmean']
 
 

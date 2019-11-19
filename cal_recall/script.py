@@ -319,6 +319,7 @@ def evaluate_method(gtFilePath, submFilePath, evaluationParams):
 
 def cal_recall_precison_f1(gt_path, result_path, show_result=False):
     p = {'g': gt_path, 's': result_path}
+    print('zzzz',p)
     result = rrc_evaluation_funcs.main_evaluation(p, default_evaluation_params, validate_data, evaluate_method,
                                                   show_result)
     return result['method']
