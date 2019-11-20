@@ -123,7 +123,7 @@ def eval(model, save_path, test_path, device):
     long_size = 2240
     # 预测所有测试图片
     img_paths = [os.path.join(img_path, x) for x in os.listdir(img_path)]
-    img_paths = img_paths[:2]
+    # img_paths = img_paths[:2]
     for img_path in tqdm(img_paths, desc='test models'):
         img_name = os.path.basename(img_path).split('.')[0]
         save_name = os.path.join(save_path, 'res_' + img_name + '.txt')
@@ -146,13 +146,14 @@ def eval(model, save_path, test_path, device):
                 boxes_list = boxes_list / scale
         np.savetxt(save_name, boxes_list.reshape(-1, 8), delimiter=',', fmt='%d')
     # 开始计算 recall precision f
-    print('222', save_path)
+    # print('222', save_path)
     result_dict = cal_recall_precison_f1(gt_path, save_path)
-    print('111', result_dict)
+    # print('111', result_dict)
     return result_dict['recall'], result_dict['precision'], result_dict['hmean']
 
 
 def main():
+    print('this 1!')
     if config.output_dir is None:
         config.output_dir = 'output'
     if config.restart_training:

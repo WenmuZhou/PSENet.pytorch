@@ -103,7 +103,7 @@ def image_label(im_fn: str, text_polys: np.ndarray, text_tags: list, n: int, m: 
     '''
 
     im = cv2.imread(im_fn)
-    im = cv2.cvtColor(im,cv2.COLOR_BGR2RGB)
+    im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
     h, w, _ = im.shape
     # 检查越界
     text_polys = check_and_validate_polys(text_polys, (h, w))
@@ -131,8 +131,8 @@ def image_label(im_fn: str, text_polys: np.ndarray, text_tags: list, n: int, m: 
         score_map, training_mask = generate_rbox((h, w), text_polys, text_tags, training_mask, i, n, m)
         score_maps.append(score_map)
     score_maps = np.array(score_maps, dtype=np.float32)
-    imgs = data_aug.random_crop_author([im, score_maps.transpose((1, 2, 0)),training_mask], (input_size, input_size))
-    return imgs[0], imgs[1].transpose((2, 0, 1)), imgs[2]#im,score_maps,training_mask#
+    imgs = data_aug.random_crop_author([im, score_maps.transpose((1, 2, 0)), training_mask], (input_size, input_size))
+    return imgs[0], imgs[1].transpose((2, 0, 1)), imgs[2]  # im,score_maps,training_mask#
 
 
 class MyDataset(data.Dataset):
@@ -168,7 +168,7 @@ class MyDataset(data.Dataset):
                 data_list.append((x, bboxs, text))
             else:
                 print('there is no suit bbox on {}'.format(label_path))
-        return data_list[:10]
+        return data_list
 
     def _get_annotation(self, label_path: str) -> tuple:
         boxes = []

@@ -14,7 +14,7 @@ def default_evaluation_params():
         'IOU_CONSTRAINT': 0.5,
         'AREA_PRECISION_CONSTRAINT': 0.5,
         'GT_SAMPLE_NAME_2_ID': 'gt_([0-9]+).txt',
-        'DET_SAMPLE_NAME_2_ID': 'res_img_([0-9]+).txt',
+        'DET_SAMPLE_NAME_2_ID': 'res_([0-9]+).txt',
         'LTRB': False,  # LTRB:2points(left,top,right,bottom) or 4 points(x1,y1,x2,y2,x3,y3,x4,y4)
         'CRLF': False,  # Lines are delimited by Windows CRLF format
         'CONFIDENCES': False,  # Detections must include confidence value. AP will be calculated
