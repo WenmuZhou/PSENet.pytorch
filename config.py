@@ -4,7 +4,8 @@
 
 # data config
 trainroot = '/home/shizai/datadisk2/tyin/images/'
-testroot = '/home/shizai/datadisk4/SynthText/miao/'
+# testroot = '/home/shizai/datadisk4/SynthText/miao/'
+testroot = '/home/shizai/datadisk2/tyin/images/'
 output_dir = './output/psenet_gendata_resnet152_4gpu_author_crop_adam_MultiStepLR_authorloss'
 data_shape = 640
 
