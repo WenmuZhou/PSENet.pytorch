@@ -13,7 +13,7 @@ data_shape = 640
 gpu_id = '4'
 workers = 12
 start_epoch = 0
-epochs = 600
+epochs = 10
 
 train_batch_size = 4
 
