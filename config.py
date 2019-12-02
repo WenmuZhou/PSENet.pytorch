@@ -10,7 +10,7 @@ output_dir = './output/psenet_gendata_resnet152_4gpu_author_crop_adam_MultiStepL
 data_shape = 640
 
 # train config
-gpu_id = '3'
+gpu_id = '4'
 workers = 12
 start_epoch = 0
 epochs = 600
