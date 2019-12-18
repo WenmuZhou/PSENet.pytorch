@@ -52,7 +52,8 @@ namespace pse{
 
         int dx[4] = {-1, 1, 0, 0};
         int dy[4] = {0, 0, -1, 1};
-        for (int i = c-2; i>=0; i--)
+        // merge from small to large kernel progressively
+        for (int i = 1; i<c; i++)
         {
             //get each kernels
             auto p_Sn = ptr_Sn + i*h*w;

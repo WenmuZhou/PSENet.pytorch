@@ -84,8 +84,10 @@ class PSELoss(nn.Module):
             return selected_mask
 
         neg_score = score[gt_text <= 0.5]
+        # 将负样本得分从高到低排序
         neg_score_sorted = np.sort(-neg_score)
         threshold = -neg_score_sorted[neg_num - 1]
+        # 选出 得分高的 负样本 和正样本 的 mask
         selected_mask = ((score >= threshold) | (gt_text > 0.5)) & (training_mask > 0.5)
         selected_mask = selected_mask.reshape(1, selected_mask.shape[0], selected_mask.shape[1]).astype('float32')
         return selected_mask
