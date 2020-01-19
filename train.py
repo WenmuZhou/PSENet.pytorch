@@ -191,7 +191,7 @@ def main():
     # optimizer = torch.optim.SGD(models.parameters(), lr=config.lr, momentum=0.99)
     optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
     if config.checkpoint != '' and not config.restart_training:
-        start_epoch = load_checkpoint(config.checkpoint, model, logger, device)
+        start_epoch = load_checkpoint(config.checkpoint, model, logger, device, optimizer)
         start_epoch += 1
         scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, config.lr_decay_step, gamma=config.lr_gamma,
                                                          last_epoch=start_epoch)
