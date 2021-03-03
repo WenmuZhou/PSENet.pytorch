@@ -107,7 +107,7 @@ def train_epoch(net, optimizer, scheduler, train_loader, device, criterion, epoc
                 writer.add_image(tag='output/preds', img_tensor=show_y, global_step=cur_step)
     scheduler.step()
     lr = scheduler.get_last_lr()[0]
-    writer.add_scalar(tag='Train/lr', scalar_value=lr, global_step=epoch * all_step)
+    writer.add_scalar(tag='Train/lr', scalar_value=lr, global_step=epoch)
     writer.add_scalar(tag='Train_epoch/loss', scalar_value=train_loss / all_step, global_step=epoch)
     return train_loss / all_step, lr
 
