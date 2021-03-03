@@ -66,8 +66,6 @@ def train_epoch(net, optimizer, scheduler, train_loader, device, criterion, epoc
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        scheduler.step()
-        lr = scheduler.get_last_lr()[0]
         train_loss += loss.item()
 
         loss_c = loss_c.item()
@@ -77,14 +75,14 @@ def train_epoch(net, optimizer, scheduler, train_loader, device, criterion, epoc
         writer.add_scalar(tag='Train/loss_c', scalar_value=loss_c, global_step=cur_step)
         writer.add_scalar(tag='Train/loss_s', scalar_value=loss_s, global_step=cur_step)
         writer.add_scalar(tag='Train/loss', scalar_value=loss, global_step=cur_step)
-        writer.add_scalar(tag='Train/lr', scalar_value=lr, global_step=cur_step)
+
 
         if i % config.display_interval == 0:
             batch_time = time.time() - start
             logger.info(
-                '[{}/{}], [{}/{}], step: {}, {:.3f} samples/sec, batch_loss: {:.4f}, batch_loss_c: {:.4f}, batch_loss_s: {:.4f}, time:{:.4f}, lr:{}'.format(
+                '[{}/{}], [{}/{}], step: {}, {:.3f} samples/sec, batch_loss: {:.4f}, batch_loss_c: {:.4f}, batch_loss_s: {:.4f}, time:{:.4f}'.format(
                     epoch, config.epochs, i, all_step, cur_step, config.display_interval * cur_batch / batch_time,
-                    loss, loss_c, loss_s, batch_time, lr))
+                    loss, loss_c, loss_s, batch_time))
             start = time.time()
 
         if i % config.show_images_interval == 0:
@@ -107,6 +105,9 @@ def train_epoch(net, optimizer, scheduler, train_loader, device, criterion, epoc
                 show_y = show_y.reshape(b * c, h, w)
                 show_y = vutils.make_grid(show_y.unsqueeze(1), nrow=config.n, normalize=False, padding=20, pad_value=1)
                 writer.add_image(tag='output/preds', img_tensor=show_y, global_step=cur_step)
+    scheduler.step()
+    lr = scheduler.get_last_lr()[0]
+    writer.add_scalar(tag='Train/lr', scalar_value=lr, global_step=epoch * all_step)
     writer.add_scalar(tag='Train_epoch/loss', scalar_value=train_loss / all_step, global_step=epoch)
     return train_loss / all_step, lr
 
