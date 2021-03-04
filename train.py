@@ -55,9 +55,8 @@ def train_epoch(net, optimizer, scheduler, train_loader, device, criterion, epoc
     net.train()
     train_loss = 0.
     start = time.time()
-    scheduler.step()
     # lr = adjust_learning_rate(optimizer, epoch)
-    lr = scheduler.get_lr()[0]
+    lr = scheduler.get_last_lr()[0]
     for i, (images, labels, training_mask) in enumerate(train_loader):
         cur_batch = images.size()[0]
         images, labels, training_mask = images.to(device), labels.to(device), training_mask.to(device)
@@ -82,9 +81,9 @@ def train_epoch(net, optimizer, scheduler, train_loader, device, criterion, epoc
         if i % config.display_interval == 0:
             batch_time = time.time() - start
             logger.info(
-                '[{}/{}], [{}/{}], step: {}, {:.3f} samples/sec, batch_loss: {:.4f}, batch_loss_c: {:.4f}, batch_loss_s: {:.4f}, time:{:.4f}, lr:{}'.format(
+                '[{}/{}], [{}/{}], step: {}, {:.3f} samples/sec, batch_loss: {:.4f}, batch_loss_c: {:.4f}, batch_loss_s: {:.4f}, time:{:.4f},lr:{:.4f}'.format(
                     epoch, config.epochs, i, all_step, cur_step, config.display_interval * cur_batch / batch_time,
-                    loss, loss_c, loss_s, batch_time, lr))
+                    loss, loss_c, loss_s, batch_time,lr))
             start = time.time()
 
         if i % config.show_images_interval == 0:
@@ -107,6 +106,7 @@ def train_epoch(net, optimizer, scheduler, train_loader, device, criterion, epoc
                 show_y = show_y.reshape(b * c, h, w)
                 show_y = vutils.make_grid(show_y.unsqueeze(1), nrow=config.n, normalize=False, padding=20, pad_value=1)
                 writer.add_image(tag='output/preds', img_tensor=show_y, global_step=cur_step)
+    scheduler.step()
     writer.add_scalar(tag='Train_epoch/loss', scalar_value=train_loss / all_step, global_step=epoch)
     return train_loss / all_step, lr
 
